@@ -2,7 +2,8 @@
 
 import pigpio
 from time import sleep
-import math
+
+from converter import Converter
 
 PIN_PWM = 18 #12 #18
 PIN_UP = 23 #16 #23
@@ -19,30 +20,67 @@ POTMETER_MIN = 0.0
 POTMETER_MAX = 100.0
 POTMETER_STEP = 1.0
 
-pi_pwm = pigpio.pi()
 
-pi_pwm.set_mode(PIN_PWM, pigpio.OUTPUT)
-pi_pwm.set_mode(PIN_UP, pigpio.INPUT)
-pi_pwm.set_mode(PIN_DOWN, pigpio.INPUT)
+actuators = {
+    '1':{'pin': PIN_PWM, 'freq': PWM_FREQ, 'min-duty-cycle': MIN_DUTY_CYCLE, 'max-duty-cycle': MAX_DUTY_CYCLE}
+}
+sensors = {
+    'up':{'pin': PIN_UP}, 
+    'down':{'pin': PIN_DOWN}
+}
+
+class Board(object):
+    __instance = None
+
+    @classmethod
+    def getInstance(cls):
+        inst = cls.__new__(cls)
+        cls.__init__(cls.__instance) 
+        return inst
+
+    def __new__(cls):
+        if Board.__instance is None:
+            Board.__instance = object.__new__(cls)
+        return Board.__instance
+
+    def __init__(self):
+
+        self.pi_pwm = pigpio.pi()
+
+        self.pi_pwm.set_mode(PIN_PWM, pigpio.OUTPUT)
+        self.pi_pwm.set_mode(PIN_UP, pigpio.INPUT)
+        self.pi_pwm.set_mode(PIN_DOWN, pigpio.INPUT)
+
+    def setPwmByValue(self, actuator, value):
+
+        # calculate the pwm by value
+        fadeValue = Converter.getLinearValueToExponential(value, POTMETER_MAX, MAX_DUTY_CYCLE)
+
+        # Change the Duty Cycle
+        self.pi_pwm.hardware_PWM(actuators[actuator]['pin'], actuators[actuator]['freq'], fadeValue)
+
+        return fadeValue
+
+    def getSensorUp(self):
+        return self.pi_pwm.read(sensors['up']['pin'])
+
+    def getSensorDown(self):
+        return self.pi_pwm.read(sensors['down']['pin'])
+
+
+board = Board.getInstance()
 
 # 0-100
-potmeterValue = MIN_DUTY_CYCLE
-#pi_pwm.start(potmeterValue)
-#pi_pwm.set_servo_pulsewidth(PIN_PWM, 500)
-#pi_pwm.start(0)
+potmeterValue = POTMETER_MIN
 
-
+actuatorLight = '1'
 
 while True:
-#        up_value = GPIO.input(PIN_UP)
-#        down_value = GPIO.input(PIN_DOWN)
 
-        up_value = pi_pwm.read(PIN_UP)
-        down_value = pi_pwm.read(PIN_DOWN)
+        up_value = board.getSensorUp()
+        down_value = board.getSensorDown()
 
         change = False
-
-#        print(up_value, down_value)
 
         if up_value and down_value:
             potmeterValue = 0
@@ -59,29 +97,11 @@ while True:
 
         if change:
 
-            #print(potmeterValue)
+            pwmValue = board.setPwmByValue(actuatorLight, potmeterValue)
 
-            # 0 ,,, 1
-            normalizedValue = potmeterValue / POTMETER_MAX
-
-            POWER = 80
-
-            # 1 ... POWER -> 0 ,,, (POWER-1)
-            expValue = math.pow(POWER, normalizedValue) - 1
-
-            # 0 ... MAX_DUTY_CYCLE
-            fadeValue = (int)(MAX_DUTY_CYCLE * expValue / (POWER - 1))
-
-            # Change the Duty Cycle
-            pi_pwm.hardware_PWM(PIN_PWM, PWM_FREQ, fadeValue)
-
-            print(potmeterValue, expValue, fadeValue)
+            print(potmeterValue, pwmValue)
 
         sleep(SLEEP)
-
-
-
-
 
 
 

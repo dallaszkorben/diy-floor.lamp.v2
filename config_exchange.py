@@ -2,17 +2,10 @@ import os
 import configparser
 from pathlib import Path
 import logging
-from builtins import UnicodeDecodeError
+#from builtins import UnicodeDecodeError
 
 from property import Property
-
-class Config:
-    HOME = str(Path.home())
-    CONFIG_FOLDER = '.lightcontrol'
-
-    @staticmethod 
-    def get_path_to_config_folder():
-        return os.path.join(Config.HOME, Config.CONFIG_FOLDER)
+from config_location import ConfigLocation
 
 class ConfigExchange( Property ):
     INI_FILE_NAME="config_exchange.ini"
@@ -36,7 +29,7 @@ class ConfigExchange( Property ):
 # ---
 
     def __init__(self):
-        folder = os.path.join(Config.HOME, Config.CONFIG_FOLDER)
+        folder = os.path.join(ConfigLocation.HOME, ConfigLocation.CONFIG_FOLDER)
         file = os.path.join(folder, ConfigExchange.INI_FILE_NAME)
         super().__init__( file, True, folder )
 
@@ -52,18 +45,15 @@ class ConfigExchange( Property ):
 # ---
 
 def getConfigExchange():
-    return ConfigExchange.getInstance()
-
-def getConfig():
-    ce = getConfigExchange()
+    ce = ConfigExchange.getInstance()
     config = {}
 
     config['light-value'] = ce.getLightValue()
 
     return config
 
-def setConfig(config):
-    ce = getConfigExchange()
+def setConfigExchange(config):
+    ce = ConfigExchange.getInstance()
 
     if "light-value" in config:
         ce.setLightValue(config["light-value"])

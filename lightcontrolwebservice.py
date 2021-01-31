@@ -6,22 +6,25 @@ from flask import jsonify
 from flask_classful import FlaskView, route, request
 from representations import output_json
 
+from config_exchange import getConfigExchange
+from config_exchange import setConfigExchange
 
-from config_exchange import getConfig
-from config_exchange import setConfig
+from converter import Converter
+
+from board import Board
 
 app = Flask(__name__)
 
-class InvalidAPIUsage(Exception):
-    def __init__(self, message, status_code=None, payload=None):
-        super().__init__(message)
-        if status_code is not None:
-            self.code = status_code
-        else:
-            self.code = 400
-        self.payload = payload
-
 class ServiceControl:
+
+    class InvalidAPIUsage(Exception):
+        def __init__(self, message, status_code=None, payload=None):
+            super().__init__(message)
+            if status_code is not None:
+                self.code = status_code
+            else:
+                self.code = 400
+            self.payload = payload
 
     # ---------------------------------
     #
@@ -43,7 +46,7 @@ class ServiceControl:
         #
         @route("",  methods=['GET'] )
         def getConfig(self):
-            config_ini = getConfig()
+            config_ini = getConfigExchange()
             lightValue = config_ini["light-value"]
             json_data = {
                           'actuators': [
@@ -81,7 +84,7 @@ class ServiceControl:
         #
         @route("/actuator/<id>",  methods=['GET'] )
         def get(self, id):
-            config_ini = getConfig()
+            config_ini = getConfigExchange()
             #lightValue = config_ini["light-value"]
             try:
                 actuatorId = int(id)
@@ -129,11 +132,19 @@ class ServiceControl:
                 actuatorId = -1
             if actuatorId == 1:
 
-                config_ini = getConfig()
-                config_ini["light-value"] = value
-                setConfig(config_ini)
+                if value >= 0 and value <= 100:
 
-                print("POST /actuator", "id=", id, "value=",value)
+                    config_ini = getConfigExchange()
+                    config_ini["light-value"] = value
+                    setConfigExchange(config_ini)
+
+                    Board.getInstance().setPwmByValue(id, value)
+
+                    print("                                      POST /actuator", "id=", id, "value=", value)
+
+                else:
+
+                    raise InvalidAPIUsage("The value is not valid: {0}".format(value), status_code=404)
 
             else:
 
@@ -165,14 +176,14 @@ class ServiceControl:
     # Shows any other Errors in application/json format
     #
     # #################################################
-    @app.errorhandler(Exception)
-    def handle_error(e):
-        if hasattr(e, 'code'):
-            code = e.code
-        else:
-            code = ""
-
-        return jsonify({"error": str(e)}), code, {'Content-Type': 'application/json'}
+#    @app.errorhandler(Exception)
+#    def handle_error(e):
+#        if hasattr(e, 'code'):
+#            code = e.code
+#        else:
+#            code = ""
+#
+#        return jsonify({"error": str(e)}), code, {'Content-Type': 'application/json'}
 
 
     def startService(self):
