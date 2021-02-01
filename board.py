@@ -5,18 +5,22 @@ from converter import Converter
 from config_board import getConfigBoard
 from config_board import setConfigBoard
 
+from time import sleep
+
 class Board(object):
     __instance = None
 
     @classmethod
     def getInstance(cls):
-        inst = cls.__new__(cls)
-        cls.__init__(cls.__instance) 
+        if Board.__instance is None:
+            inst = cls.__new__(cls)
+            cls.__init__(cls.__instance)
+        else:
+            inst = Board.__instance
         return inst
 
     def __new__(cls):
-        if Board.__instance is None:
-            Board.__instance = object.__new__(cls)
+        Board.__instance = object.__new__(cls)
         return Board.__instance
 
     def __init__(self):
@@ -61,6 +65,37 @@ class Board(object):
         self.pi_pwm.hardware_PWM(int(self.actuators[actuator]['pin']), int(self.actuators[actuator]['freq']), fadeValue)
 
         return fadeValue
+
+    def setPwmByStepValueGradually(self, actuator, fromValue, toValue, inSeconds):
+
+        diff = toValue - fromValue
+        secInOneStep = abs(inSeconds / diff)
+
+        print("fromValue:", fromValue, "toValue:", toValue, "inSeconds:", inSeconds)
+
+        if diff >= 0:
+            par1 = fromValue
+            par2 = toValue + 1
+            par3 = 1
+
+        elif diff < 0:
+            par1 = fromValue
+            par2 = toValue - 1
+            par3 = -1
+
+        print("par1:", par1, "par2:", par2, "par3:", par3)
+
+        for value in range(par1, par2, par3):
+            print("waiting:", secInOneStep, "value: ", value)
+            sleep(secInOneStep)
+
+            fadeValue = Converter.getLinearValueToExponential(value, int(self.potmeterMax), int(self.actuators[actuator]['max-duty-cycle']))
+            self.pi_pwm.hardware_PWM(int(self.actuators[actuator]['pin']), int(self.actuators[actuator]['freq']), fadeValue)
+
+        print("done  value:", toValue)
+
+        return
+
 
     def getSensorUp(self):
         return self.pi_pwm.read(self.sensors['up']['pin'])

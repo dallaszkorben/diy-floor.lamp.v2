@@ -8,6 +8,9 @@ from representations import output_json
 
 from config_exchange import getConfigExchange
 from config_exchange import setConfigExchange
+from config_board import getConfigBoard
+
+from threading import Thread
 
 from converter import Converter
 
@@ -15,7 +18,23 @@ from board import Board
 
 app = Flask(__name__)
 
+cb = getConfigBoard()
+try:
+    POTMETER_MIN = int(cb["potmeter-min"])
+except(ValueError):
+    POTMETER_MIN = 0
+try:
+    POTMETER_MAX = int(cb["potmeter-max"])
+except(ValueError):
+    POTMETER_MAX = 100
+try:
+    POTMETER_STEP = cb["potmeter-min"]
+except(ValueError):
+    POTMETER_STEP = 1
+
 class ServiceControl:
+
+#    def __init__(self):
 
     class InvalidAPIUsage(Exception):
         def __init__(self, message, status_code=None, payload=None):
@@ -148,7 +167,7 @@ class ServiceControl:
 
             else:
 
-                raise InvalidAPIUsage("No such actuator: {0}".format(id), status_code=404)
+                raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(id, value), status_code=404)
 
             return {'status': 'OK'}
 
@@ -168,6 +187,103 @@ class ServiceControl:
             value = json_data.get("value")
 
             return self.post(id, value)
+
+# ---
+
+        #
+        # Simple way to increase/decrease the light value unneduately
+        #
+        # POST http://localhost:5000/acturator/1/stepvalue/-10
+        #
+        @route('/<id>/stepvalue/<step_value>', methods=['POST'])
+        def postActuatorStepValueImmediately(self, id, step_value):
+
+            try:
+                actuatorId = int(id)
+                stepValue = int(step_value)
+            except(ValueError):
+                actuatorId = -1
+            if actuatorId == 1:
+
+#
+                config_ini = getConfigExchange()
+                actual_value = config_ini['light-value']
+
+                try:
+                    actualValue = int(actual_value)
+                except(ValueError):
+                    actualValue = 0
+
+                newValue = actualValue + stepValue
+                if newValue < POTMETER_MIN:
+                    newValue = POTMETER_MIN
+
+                elif newValue > POTMETER_MAX:
+                    newValue = POTMETER_MAX
+
+                config_ini["light-value"] = newValue
+                setConfigExchange(config_ini)
+
+                Board.getInstance().setPwmByValue(id, newValue)
+
+                print("                                      POST /actuator", "id=", id, "startValue=", actualValue, "stepValue=", stepValue, "newValue=", newValue)
+
+            else:
+
+                raise InvalidAPIUsage("No such actuator: {0} or step value: {1}".format(id, step_value), status_code=404)
+
+            return {'status': 'OK'}
+
+        #
+        # Simple way to increase/decrease the light value gradually
+        #
+        # POST http://localhost:5000/acturator/1/stepvalue/-10
+        #
+        @route('/<id>/stepvalue/<step_value>/inseconds/<in_seconds>', methods=['POST'])
+        def postActuatorStepValueGradually(self, id, step_value, in_seconds):
+
+            try:
+                actuatorId = int(id)
+                stepValue = int(step_value)
+                inSeconds = int(in_seconds)
+            except(ValueError):
+                actuatorId = -1
+            if actuatorId == 1:
+#
+                config_ini = getConfigExchange()
+                actual_value = config_ini['light-value']
+
+                try:
+                    actualValue = int(actual_value)
+                except(ValueError):
+                    actualValue = 0
+
+                newValue = actualValue + stepValue
+                if newValue < POTMETER_MIN:
+                    newValue = POTMETER_MIN
+
+                elif newValue > POTMETER_MAX:
+                    newValue = POTMETER_MAX
+
+                config_ini["light-value"] = newValue
+                setConfigExchange(config_ini)
+
+                thread = Thread(target = Board.getInstance().setPwmByStepValueGradually, args = (id, actualValue, newValue, inSeconds)) 
+                thread.daemon = True
+                thread.start()
+
+                #Board.getInstance().setPwmByValue(id, newValue)
+
+                print("                                      POST /actuator", "id=", id, "startValue=", actualValue, "stepValue=", stepValue, "newValue=", newValue)
+
+            else:
+
+                raise InvalidAPIUsage("No such actuator: {0} or step value: {1} or seconds {2}".format(id, step_value, in_seconds), status_code=404)
+
+            return {'status': 'OK'}
+
+
+
 
 #    ----------------
 
