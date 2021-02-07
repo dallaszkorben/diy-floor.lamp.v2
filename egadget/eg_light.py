@@ -8,7 +8,7 @@ from time import sleep
 #else:
 from senact.sa_pwm import SAPwm
 from senact.sa_ky040 import SAKy040
-from senact.sa import SA
+from egadget.eg import EG
 
 #if __name__ == "__main__":
 #    import os
@@ -25,17 +25,20 @@ from senact.sa import SA
 #    from senact.sa_pwm import SAPwm
 #    from senact.sa_ky040 import SAKy040
 
-class SALight(SA):
+class EGLight(EG):
 
     POTMETER_MIN = 0
     POTMETER_MAX = 100
 
-    ACTUATOR_LIGHT_ID = '1'
+    def __init__(self, gadgetName, actuatorId, pinPwm, freqPwm, sensorId, pinClock, pinData, pinSwitch, fetchLightValue, saveLightValue):
 
-    def __init__(self, pinPwm, freqPwm, pinClock, pinData, pinSwitch, fetchLightValue, saveLightValue):
+        self.gadgetName = gadgetName
 
+        self.actuatorId = actuatorId
         self.pinPwm = pinPwm
         self.freqPwm = freqPwm
+
+        self.sensorId = sensorId
         self.pinClock = pinClock
         self.pinData = pinData
         self.pinSwitch = pinSwitch
@@ -43,15 +46,37 @@ class SALight(SA):
         self.fetchLightValue = fetchLightValue
         self.saveLightValue = saveLightValue
 
-        self.saPwm = SAPwm(pinPwm, freqPwm)
-        self.saKy040 = SAKy040(pinClock, pinData, pinSwitch, self.rotaryChanged, self.switchPressed)
+        self.saPwm = SAPwm(actuatorId, pinPwm, freqPwm)
+        self.saKy040 = SAKy040(sensorId, pinClock, pinData, pinSwitch, self.rotaryChanged, self.switchPressed)
+
         self.saPwm.configure()
         self.saKy040.configure()
 
-        self.actuatorLightId = self.__class__.ACTUATOR_LIGHT_ID
+        self.resetLight()
 
-    def getActuatorLightId(self):
-        return self.actuatorLightId
+    def getSensor(self, id):
+        if id == self.sensorId:
+            return self.saKy040
+        else:
+            raise AttributeError("id={id} is not a valid ID")
+
+    def getActuator(self, id):
+        if id == self.actuatorId:
+            return self.saPwm
+        else:
+            raise AttributeError("id={id} is not a valid ID")
+
+    def getSensorIds(self):
+        return (self.sensorId, )
+
+    def getActuatorIds(self):
+        return (self.actuatorId, )
+
+    def resetLight(self):
+        lightValue = self.fetchLightValue()
+        self.setLight(lightValue)
+
+        print( "reset - ", str(lightValue))
 
     def rotaryChanged(self, value):
 
@@ -90,7 +115,4 @@ class SALight(SA):
         pwmValue = self.saPwm.setPwmByStepValueGradually(actuator, fromValue, toValue, inSeconds)
         self.saveLightValue(toValue)
 
-    def unconfigure(self):
-        self.saPwm.unconfigure()
-        self.saKy040.unconfigure()
 

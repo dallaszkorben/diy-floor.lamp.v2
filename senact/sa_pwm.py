@@ -10,6 +10,8 @@ from senact.sa import SA
 import os
 import sys
 
+from senact.senact import SenAct
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
@@ -31,9 +33,11 @@ class SAPwm(SA):
     MIN_DUTY_CYCLE = 0
     MAX_DUTY_CYCLE = 1000000
 
+    SENACT_TYPE = SenAct.ACTUATOR
 
-    def __init__(self, pwmPin, pwmFreq):
+    def __init__(self, id, pwmPin, pwmFreq):
 
+        self.id = id
         self.maxDutyCycle = self.__class__.MAX_DUTY_CYCLE
         self.maxValue = self.__class__.MAX_VALUE
 
@@ -42,6 +46,12 @@ class SAPwm(SA):
 
         self.pi_pwm = pigpio.pi()
         self.pi_pwm.set_mode(self.pwmPin, pigpio.OUTPUT)
+
+    def getSenactType(self):
+        return self.__class__.SENACT_TYPE
+
+    def getSenactId(self):
+        return self.id
 
     def setPwmByValue(self, value):
 
@@ -56,6 +66,11 @@ class SAPwm(SA):
     def setPwmByStepValueGradually(self, actuator, fromValue, toValue, inSeconds):
 
         diff = toValue - fromValue
+
+        if diff == 0:
+            print("already done  value:", toValue)
+            return
+
         secInOneStep = abs(inSeconds / diff)
 
         print("fromValue:", fromValue, "toValue:", toValue, "inSeconds:", inSeconds)

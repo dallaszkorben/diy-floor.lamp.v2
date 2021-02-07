@@ -32,7 +32,7 @@ class Property(object):
 
             self.parser[section]={key: default_value}
             self.__write_file()
-            
+
         try:
             self.parser.read(self.file, encoding='utf-8')
         except UnicodeDecodeError as e:

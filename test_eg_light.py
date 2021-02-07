@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 
-from senact.sa_light import SALight
+from egadget.eg_light import EGLight
 from time import sleep
 
 if __name__ == "__main__":
@@ -22,10 +22,10 @@ if __name__ == "__main__":
         global potmeterValue
         potmeterValue = value;
 
-    iLight = SALight( PIN_PWM, FREQ_PWM, PIN_CLOCK, PIN_DATA, PIN_SWITCH, getPotmeterValue, setPotmeterValue )
+    saLight = EGLight( "Lamp", "1", PIN_PWM, FREQ_PWM, "1", PIN_CLOCK, PIN_DATA, PIN_SWITCH, getPotmeterValue, setPotmeterValue )
 
     try:
         while True:
             sleep(10)
     finally:
-        iLight.unconfigure()
+        saLight.unconfigure()

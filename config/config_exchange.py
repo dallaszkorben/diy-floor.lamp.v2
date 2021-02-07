@@ -4,8 +4,8 @@ from pathlib import Path
 import logging
 #from builtins import UnicodeDecodeError
 
-from property import Property
-from config_location import ConfigLocation
+from config.property import Property
+from config.config_location import ConfigLocation
 
 class ConfigExchange( Property ):
     INI_FILE_NAME="config_exchange.ini"

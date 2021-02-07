@@ -3,11 +3,11 @@ import configparser
 from pathlib import Path
 import logging
 
-from property import Property
-from config_location import ConfigLocation
+from config.property import Property
+from config.config_location import ConfigLocation
 
-class ConfigBoard( Property ):
-    INI_FILE_NAME="config_board.ini"
+class ConfigEGadget( Property ):
+    INI_FILE_NAME="config_egadget.ini"
 
     # (section, key, default)
     DEFAULT_ACTUATOR_1_PWM_PIN = ("actuator-1", "pin", 18)
@@ -40,7 +40,7 @@ class ConfigBoard( Property ):
 
     def __init__(self):
         folder = os.path.join(ConfigLocation.HOME, ConfigLocation.CONFIG_FOLDER)
-        file = os.path.join(folder, ConfigBoard.INI_FILE_NAME)
+        file = os.path.join(folder, ConfigEGadget.INI_FILE_NAME)
         super().__init__( file, True, folder )
 
     def getActuator1PwmPin(self):
@@ -105,8 +105,8 @@ class ConfigBoard( Property ):
 # ---
 # ---
 
-def getConfigBoard():
-    cb = ConfigBoard.getInstance()
+def getConfigEGadget():
+    cb = ConfigEGadget.getInstance()
     config = {}
 
     config["actuator-1-pin"] = cb.getActuator1PwmPin()
@@ -124,8 +124,8 @@ def getConfigBoard():
 
     return config
 
-def setConfigBoard(config):
-    cb = ConfigBoard.getInstance()
+def setConfigEGadget(config):
+    cb = ConfigEGadget.getInstance()
 
     if "actuator-1-pin" in config:
         cb.setActuator1PwmPin(config["actuator-1-pin"])

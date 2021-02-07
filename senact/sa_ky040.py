@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 from time import sleep
 from time import time
 from threading import Thread
+from senact.senact import SenAct
 
 #if __name__ == "__main__":
 #from sa import SA
@@ -21,11 +22,13 @@ class SAKy040(SA):
 
     MIN_DIFF_TIME = 0.1
 
-    def __init__(self, clockPin, dataPin, switchPin, rotaryCallback, switchCallback):
+    SENACT_TYPE = SenAct.SENSOR
+
+    def __init__(self, id, clockPin, dataPin, switchPin, rotaryCallback, switchCallback):
 
         GPIO.setmode(GPIO.BCM)
 
-        #persist values
+        self.id = id
         self.clockPin = clockPin
         self.dataPin = dataPin
         self.switchPin = switchPin
@@ -39,6 +42,12 @@ class SAKy040(SA):
 
         self.last_change = 0
         self.last_change_time = time()
+
+    def getSenactType(self):
+        return self.__class__.SENACT_TYPE
+
+    def getSenactId(self):
+        return self.id
 
     def configure(self):
 
@@ -143,9 +152,10 @@ if __name__ == "__main__":
     def switchPressed():
         print ("button pressed")
 
-    ky040 = SAKy040(CLOCK_PIN, DATA_PIN, SWITCH_PIN, rotaryChange, switchPressed)
+    ky040 = SAKy040("1", CLOCK_PIN, DATA_PIN, SWITCH_PIN, rotaryChange, switchPressed)
     ky040.configure()
 
+    print(ky040.getSe)
     try:
         while True:
             sleep(10)

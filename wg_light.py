@@ -10,13 +10,13 @@ from representations import output_json
 
 from threading import Thread
 
-from senact.sa_light import SALight
+from egadget.eg_light import EGLight
 
-from config_exchange import getConfigExchange
-from config_exchange import setConfigExchange
-from config_board import getConfigBoard
+from config.config_exchange import getConfigExchange
+from config.config_exchange import setConfigExchange
+from config.config_egadget import getConfigEGadget
 
-class EGLight(object):
+class WGLight(object):
 
     # ---------------------------------
     #
@@ -44,11 +44,12 @@ class EGLight(object):
 
             lightValue = self.parent.fetchLightValue()
             json_data = {
-                          'actuators': [
+                        'gadgetName': self.parent.gadgetName,
+                        'actuators': [
                             {
                               'id': '1',
                               'name': 'lamp',
-                              'type': 'integer',
+                              'dataType': 'integer',
                               'min': 0,
                               'max': 100,
                               'actual': lightValue
@@ -191,24 +192,28 @@ class EGLight(object):
 
 # ---
 
-    def __init__(self, pinPwm, freqPwm, pinClock, pinData, pinSwitch):
+    def __init__(self, gadgetName, actuatorLightId, pinPwm, freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch):
 
-        cb = getConfigBoard()
+        cg = getConfigEGadget()
+
         try:
-            self.POTMETER_MIN = int(cb["potmeter-min"])
+            self.POTMETER_MIN = int(cg["potmeter-min"])
         except(ValueError):
             self.POTMETER_MIN = 0
         try:
-            self.POTMETER_MAX = int(cb["potmeter-max"])
+            self.POTMETER_MAX = int(cg["potmeter-max"])
         except(ValueError):
             self.POTMETER_MAX = 100
         try:
-            self.POTMETER_STEP = cb["potmeter-min"]
+            self.POTMETER_STEP = cg["potmeter-min"]
         except(ValueError):
             self.POTMETER_STEP = 1
 
-        self.saLight = SALight( pinPwm, freqPwm, pinClock, pinData, pinSwitch, self.fetchLightValue, self.saveLightValue )
-        self.actuatorLightId = self.saLight.getActuatorLightId()
+        self.gadgetName = gadgetName
+        self.actuatorLightId = actuatorLightId
+        self.sensorPotmeterId = sensorPotmeterId
+
+        self.saLight = EGLight( gadgetName, actuatorLightId, pinPwm,  freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch, self.fetchLightValue, self.saveLightValue )
 
         self.app = Flask(__name__)
 
@@ -246,9 +251,13 @@ if __name__ == "__main__":
     PIN_DATA = 27
     PIN_SWITCH = 23
 
-    egLight = EGLight( PIN_PWM, FREQ_PWM, PIN_CLOCK, PIN_DATA, PIN_SWITCH )
+    GADGET_NAME = "Light"
+    ACTUATOR_LIGHT_ID = "1"
+    SENSOR_POTMETER_ID = "1"
+
+    wgLight = WGLight( GADGET_NAME, ACTUATOR_LIGHT_ID, PIN_PWM, FREQ_PWM, SENSOR_POTMETER_ID, PIN_CLOCK, PIN_DATA, PIN_SWITCH )
 
     try:
-        egLight.run(host= '0.0.0.0')
+        wgLight.run(host= '0.0.0.0')
     finally:
-        egLight.unconfigure()
+        wgLight.unconfigure()
