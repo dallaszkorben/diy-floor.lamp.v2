@@ -54,6 +54,9 @@ class ServiceControl:
     class ConfigView(FlaskView):
         representations = {'application/json': output_json}
 
+        def __init__(self, message):
+            print(message)
+
         #
         # GET http://localhost:5000/config/
         #
@@ -134,6 +137,7 @@ class ServiceControl:
         # GET http://localhost:5000/actuator/
         #
         def index(self):
+            print('hello')
             return {}
 
         #
@@ -171,6 +175,11 @@ class ServiceControl:
 
             return {'status': 'OK'}
 
+
+
+
+
+
         #
         # Alternative way to set the light value using the body
         #
@@ -182,11 +191,44 @@ class ServiceControl:
         #
         @route("",  methods=['POST'] )
         def postActuator(self):
-            json_data = request.json
-            id = json_data.get("id")
-            value = json_data.get("value")
 
+            if request.form:
+
+                if 'id' in request.form:
+                    print('id', request.form['id'])
+                if 'value' in request.form:
+                    print('value', request.form['value'])
+
+                id = request.form['id']
+                value = request.form['value']
+
+            elif request.json:
+
+                json_data = request.json
+                id = json_data["id"]
+                value = json_data["value"]
+
+            else:
+                return
+
+
+
+
+            #json_data = request.get_json(force=True) 
+#            print('json_data', json_data)
+#            json_data = request.json
+
+
+
+
+
+            print(id, value)
             return self.post(id, value)
+
+#stepvalue
+#inseconds
+
+
 
 # ---
 
@@ -233,6 +275,19 @@ class ServiceControl:
                 raise InvalidAPIUsage("No such actuator: {0} or step value: {1}".format(id, step_value), status_code=404)
 
             return {'status': 'OK'}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #
         # Simple way to increase/decrease the light value gradually
@@ -305,7 +360,7 @@ class ServiceControl:
     def startService(self):
 
         # register the end-points
-        self.ConfigView.register(app)
+        self.ConfigView.register(app, None, None, None, None, None, "hello")
         self.ActuatorView.register(app)
         self.TemplateView.register(app)
         #self.TemplateView.register(app, route_base="/template")
@@ -314,5 +369,5 @@ serviceContrl = ServiceControl()
 serviceContrl.startService()
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host= '0.0.0.0')
 

@@ -6,22 +6,27 @@ import pigpio
 from time import sleep
 
 from converter import Converter
-from iob_ky040 import IOBKy040
+from rotary import Rotary
 
 PIN_PWM = 18 #12 #18
 #PIN_UP = 23 #16 #23
 #PIN_DOWN = 24 #18 #24
+
+CLOCK_PIN = 17
+DATA_PIN = 27
+SWITCH_PIN = 23
 
 PWM_FREQ = 800
 
 MIN_DUTY_CYCLE = 0
 MAX_DUTY_CYCLE = 1000000
 
-SLEEP = 5
+SLEEP = 10
 
 POTMETER_MIN = 0.0
 POTMETER_MAX = 100.0
 POTMETER_STEP = 1.0
+
 
 actuators = {
     '1':{'pin': PIN_PWM, 'freq': PWM_FREQ, 'min-duty-cycle': MIN_DUTY_CYCLE, 'max-duty-cycle': MAX_DUTY_CYCLE}
@@ -77,42 +82,30 @@ potmeterValue = POTMETER_MIN
 
 actuatorLight = '1'
 
-def rotaryChange(value):
+
+def rotaryChange(direction):
     global potmeterValue
     global actuatorLight
-    global board
-    potmeterValue += value
-
-    if potmeterValue > POTMETER_MAX:
-        potmeterValue = POTMETER_MAX
-    elif potmeterValue < POTMETER_MIN:
-        potmeterValue = POTMETER_MIN
-
-    print( "turned - ", str(potmeterValue))
+    print( "turned - ", str(direction))
+    potmeterValue -= 1
     pwmValue = board.setPwmByValue(actuatorLight, potmeterValue)
-
 
 def switchPressed():
     global potmeterValue
     global actuatorLight
-    global board
     print ("button pressed")
-    if potmeterValue:
-        potmeterValue  = POTMETER_MIN
-    else:
-        potmeterValue =  POTMETER_MAX
+    potmeterValue += 1
     pwmValue = board.setPwmByValue(actuatorLight, potmeterValue)
 
-CLOCK_PIN = 17
-DATA_PIN = 27
-SWITCH_PIN = 23
-
-ky040 = IOBKy040(CLOCK_PIN, DATA_PIN, SWITCH_PIN, rotaryChange, switchPressed)
-ky040.configure()
+ky040 = Rotary(CLOCK_PIN, DATA_PIN, SWITCH_PIN, rotaryChange, switchPressed)
+ky040.eventRegister()
 
 try:
     while True:
         sleep(SLEEP)
 finally:
-    ky040.unconfigure()
-#    GPIO.cleanup()
+    ky040.eventUnregister()
+    GPIO.cleanup()
+
+
+
