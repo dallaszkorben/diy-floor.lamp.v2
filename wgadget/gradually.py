@@ -8,6 +8,8 @@ from flask import jsonify
 from flask import session
 from flask_classful import FlaskView, route, request
 
+from wgadget.exceptions import InvalidAPIUsage
+
 from wgadget.representations import output_json
 
 from threading import Thread
@@ -116,19 +118,21 @@ class GraduallyView(FlaskView):
             value = request.form['value']
             inSeconds = request.form['inSeconds']
 
+            print("web")
+
         # CURL
         elif request.json:
 
             json_data = request.json
-            actuator = json_data["actuator"]
+            actuatorId = json_data["actuator"]
             value = json_data["value"]
             inSeconds = json_data["inSeconds"]
 
         else:
             return {}
 
-        print(actuator, value, inSeconds)
-        return self.set(actuator, value, inSeconds)
+        print(actuatorId, value, inSeconds)
+        return self.set(actuatorId, value, inSeconds)
 
 # ---
 
@@ -261,7 +265,7 @@ class GraduallyView(FlaskView):
                 raise InvalidAPIUsage("The value is not valid: {0}".format(value), status_code=404)
 
         else:
-            raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(id, value), status_code=404)
+            raise InvalidAPIUsage("No such actuator: {0} or value: {1} or in_seconds: {2} or at: {3}".format(actuator, value, in_seconds, isoformat_at_date_time), status_code=404)
 
         return {'status': 'OK'}
 
@@ -278,9 +282,12 @@ class GraduallyView(FlaskView):
     #                "at":"2021-02-14T21:15:00"
     #           }
     #
-    @route("/set",  methods=['POST'] )
+    @route("/schedule/set",  methods=['POST'] )
     def scheduleSetWithPayload(self):
 
+#        print("request.form", request.form)
+#        print("request.json", request.json)
+        print("!!!!!!!!!!!!!!! HAHO !!!!!!!!!!!!!!1")
         # WEB
         if request.form:
 
@@ -291,7 +298,7 @@ class GraduallyView(FlaskView):
             if 'inSeconds' in request.form:
                 print('inSeconds', request.form['inSeconds'])
             if 'at' in request.form:
-                print('fromDateTime', request.form['fromDateTime'])
+                print('at', request.form['at'])
 
             actuatorId = request.form['actuator']
             value = request.form['value']
@@ -302,7 +309,7 @@ class GraduallyView(FlaskView):
         elif request.json:
 
             json_data = request.json
-            actuator = json_data["actuator"]
+            actuatorId = json_data["actuator"]
             value = json_data["value"]
             inSeconds = json_data["inSeconds"]
             at = json_data["at"]
@@ -310,8 +317,8 @@ class GraduallyView(FlaskView):
         else:
             return {}
 
-        print(actuator, value, inSeconds, at)
-        return self.scheduleSet(actuator, value, inSeconds, at)
+        print(actuatorId, value, inSeconds, at)
+        return self.scheduleSet(actuatorId, value, inSeconds, at)
 
 
 
