@@ -11,7 +11,8 @@ class ConfigExchange( Property ):
     INI_FILE_NAME="config_exchange.ini"
 
     # (section, key, default)
-    DEFAULT_ACTUATOR_LIGHT_LEVEL = ("actuator", "light-value", "0")
+    DEFAULT_ACTUATOR_LIGHT_CURRENT_VALUE = ("actuator", "light-current-value", "0")
+    DEFAULT_ACTUATOR_LIGHT_BEFORE_OFF_VALUE = ("actuator", "light-before-off-value", "10")
 
     __instance = None
 
@@ -33,13 +34,19 @@ class ConfigExchange( Property ):
         file = os.path.join(folder, ConfigExchange.INI_FILE_NAME)
         super().__init__( file, True, folder )
 
-    def getLightValue(self):
-        return self.get(self.DEFAULT_ACTUATOR_LIGHT_LEVEL[0], self.DEFAULT_ACTUATOR_LIGHT_LEVEL[1], self.DEFAULT_ACTUATOR_LIGHT_LEVEL[2])
+    def getLightCurrentValue(self):
+        return self.get(self.DEFAULT_ACTUATOR_LIGHT_CURRENT_VALUE[0], self.DEFAULT_ACTUATOR_LIGHT_CURRENT_VALUE[1], self.DEFAULT_ACTUATOR_LIGHT_CURRENT_VALUE[2])
+
+    def getLightBeforeOffValue(self):
+        return self.get(self.DEFAULT_ACTUATOR_LIGHT_BEFORE_OFF_VALUE[0], self.DEFAULT_ACTUATOR_LIGHT_BEFORE_OFF_VALUE[1], self.DEFAULT_ACTUATOR_LIGHT_BEFORE_OFF_VALUE[2])
 
 # ---
 
-    def setLightValue(self, lightValue):
-        self.update(self.DEFAULT_ACTUATOR_LIGHT_LEVEL[0], self.DEFAULT_ACTUATOR_LIGHT_LEVEL[1], lightValue)
+    def setLightCurrentValue(self, lightValue):
+        self.update(self.DEFAULT_ACTUATOR_LIGHT_CURRENT_VALUE[0], self.DEFAULT_ACTUATOR_LIGHT_CURRENT_VALUE[1], lightValue)
+
+    def setLightBeforeOffValue(self, lightValue):
+        self.update(self.DEFAULT_ACTUATOR_LIGHT_BEFORE_OFF_VALUE[0], self.DEFAULT_ACTUATOR_LIGHT_BEFORE_OFF_VALUE[1], lightValue)
 
 # ---
 # ---
@@ -48,13 +55,16 @@ def getConfigExchange():
     ce = ConfigExchange.getInstance()
     config = {}
 
-    config['light-value'] = ce.getLightValue()
+    config['light-current-value'] = ce.getLightCurrentValue()
+    config['light-before-off-value'] = ce.getLightBeforeOffValue()
 
     return config
 
 def setConfigExchange(config):
     ce = ConfigExchange.getInstance()
 
-    if "light-value" in config:
-        ce.setLightValue(config["light-value"])
+    if "light-current-value" in config:
+        ce.setLightCurrentValue(config["light-current-value"])
 
+    if "light-before-off-value" in config:
+        ce.setLightBeforeOffValue(config["light-before-off-value"])

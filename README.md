@@ -6,3 +6,4 @@ Not pip3 install flask-classful because we need version=0.15.0, otherwise Config
 pip3 install git+https://github.com/teracyhq/flask-classful.git@develop#egg-flask-classful
 
 pip3 install flask
+pip3 install tzlocal

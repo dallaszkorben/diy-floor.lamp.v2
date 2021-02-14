@@ -54,17 +54,17 @@ class EGLight(EG):
 
         self.resetLight()
 
-    def getSensor(self, id):
-        if id == self.sensorId:
+    def getSensor(self, actuatorId):
+        if actuatorId == self.sensorId:
             return self.saKy040
         else:
-            raise AttributeError("id={id} is not a valid ID")
+            raise AttributeError("actuatorId={actuatorId} is not a valid ID")
 
-    def getActuator(self, id):
-        if id == self.actuatorId:
+    def getActuator(self, actuatorId):
+        if actuatorId == self.actuatorId:
             return self.saPwm
         else:
-            raise AttributeError("id={id} is not a valid ID")
+            raise AttributeError("actuatorId={actuatorId} is not a valid ID")
 
     def getSensorIds(self):
         return (self.sensorId, )
@@ -74,42 +74,49 @@ class EGLight(EG):
 
     def resetLight(self):
         lightValue = self.fetchLightValue()
-        self.setLight(lightValue)
 
-        print( "reset - ", str(lightValue))
+        if lightValue['current']:
+            self.setLight(lightValue['current'], lightValue['current'])
+        else:
+            self.setLight(lightValue['current'], 100)
+
+        print( "reset - ", str(lightValue['current']))
 
     def rotaryChanged(self, value):
 
         lightValue = self.fetchLightValue()
-        lightValue += value
 
-        if lightValue > self.__class__.POTMETER_MAX:
-            lightValue = self.__class__.POTMETER_MAX
-        elif lightValue < self.__class__.POTMETER_MIN:
-            lightValue = self.__class__.POTMETER_MIN
-#        self.saveLightValue(lightValue)
+        newValue = lightValue['current'] + value
 
-        self.setLight(lightValue)
+        if newValue > self.__class__.POTMETER_MAX:
+            newValue = self.__class__.POTMETER_MAX
+        elif newValue < self.__class__.POTMETER_MIN:
+            newValue = self.__class__.POTMETER_MIN
 
-        print( "turned - ", str(lightValue))
+        self.setLight(newValue, newValue)
+
+        print( "turned - ", str(newValue))
 
     def switchPressed(self):
         lightValue = self.fetchLightValue()
-        if lightValue:
-            lightValue = self.__class__.POTMETER_MIN
+
+        if lightValue['current']:
+            newValue = self.__class__.POTMETER_MIN
             turned = "off"
+            self.setLight(newValue, lightValue['current'])
+
         else:
-            lightValue = self.__class__.POTMETER_MAX
+#            newValue = self.__class__.POTMETER_MAX
+            newValue = lightValue['before-off']
             turned = "on"
+            self.setLight(newValue, newValue)
 
-        self.setLight(lightValue)
-
-        print ("button pressed - turned", turned)
+        print ("button pressed - turned", turned, "(", newValue, ")")
 
     # save the value and change the level of the light
-    def setLight(self, value):
-        self.saveLightValue(value)
-        pwmValue = self.saPwm.setPwmByValue(value)
+    def setLight(self, lightValue, lightBeforeOff):
+        self.saveLightValue(lightValue, lightBeforeOff)
+        pwmValue = self.saPwm.setPwmByValue(lightValue)
 
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
         pwmValue = self.saPwm.setPwmByStepValueGradually(actuator, fromValue, toValue, inSeconds)
