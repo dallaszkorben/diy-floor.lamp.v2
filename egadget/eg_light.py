@@ -88,10 +88,10 @@ class EGLight(EG):
 
         newValue = lightValue['current'] + value
 
-        if newValue > self.__class__.POTMETER_MAX:
-            newValue = self.__class__.POTMETER_MAX
-        elif newValue < self.__class__.POTMETER_MIN:
-            newValue = self.__class__.POTMETER_MIN
+        if newValue > EGLight.POTMETER_MAX:
+            newValue = EGLight.POTMETER_MAX
+        elif newValue < EGLight.POTMETER_MIN:
+            newValue = EGLight.POTMETER_MIN
 
         self.setLight(newValue, newValue)
 
@@ -101,7 +101,7 @@ class EGLight(EG):
         lightValue = self.fetchLightValue()
 
         if lightValue['current']:
-            newValue = self.__class__.POTMETER_MIN
+            newValue = EGLight.POTMETER_MIN
             turned = "off"
             self.setLight(newValue, lightValue['current'])
 
@@ -114,7 +114,7 @@ class EGLight(EG):
         print ("button pressed - turned", turned, "(", newValue, ")")
 
     # save the value and change the level of the light
-    def setLight(self, lightValue, lightBeforeOff):
+    def setLight(self, lightValue, lightBeforeOff=100):
         self.saveLightValue(lightValue, lightBeforeOff)
         pwmValue = self.saPwm.setPwmByValue(lightValue)
 

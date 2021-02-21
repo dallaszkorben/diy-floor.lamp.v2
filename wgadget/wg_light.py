@@ -43,7 +43,7 @@ class WGLight(object):
         self.actuatorLightId = actuatorLightId
         self.sensorPotmeterId = sensorPotmeterId
 
-        self.saLight = EGLight( gadgetName, actuatorLightId, pinPwm,  freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch, self.fetchLightValue, self.saveLightValue )
+        self.egLight = EGLight( gadgetName, actuatorLightId, pinPwm,  freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch, self.fetchLightValue, self.saveLightValue )
 
         self.app = Flask(__name__)
 
@@ -52,18 +52,26 @@ class WGLight(object):
         ImmediatelyView.register(self.app, init_argument=self)
         GraduallyView.register(self.app, init_argument=self)
 
+    def getLightId(self):
+        return self.actuatorLightId
+
+    def getPotmeterId(self):
+        return self.sensorPotmeterId
 
     def unconfigure(self):
-        self.saLight.unconfigure()
+        self.egLight.unconfigure()
 
     def run(self, host='0.0.0.0'):
         self.app.run(host=host)
 
-    def setLight(self, value):
-        self.saLight.setLight(value)
+    def setLight(self, value, beforeOffValue=100):
+        self.egLight.setLight(value, beforeOffValue)
+
+    def reverseLight(self):
+        self.egLight.switchPressed()
 
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
-        self.saLight.setLightGradually(actuator, fromValue, toValue, inSeconds)
+        self.egLight.setLightGradually(actuator, fromValue, toValue, inSeconds)
 
     def setLightScheduledGradually(self, actuator, toValue, inSeconds, atDateTime):
 
@@ -79,7 +87,7 @@ class WGLight(object):
                 break
 
         fromValue = self.fetchLightValue()
-        self.saLight.setLightGradually(actuator, fromValue['current'], toValue, inSeconds)
+        self.egLight.setLightGradually(actuator, fromValue['current'], toValue, inSeconds)
 
     def fetchLightValue(self):
         config_ini = getConfigExchange()

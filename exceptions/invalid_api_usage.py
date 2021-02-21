@@ -1,4 +1,3 @@
-
 class InvalidAPIUsage(Exception):
     status_code = 400
 
