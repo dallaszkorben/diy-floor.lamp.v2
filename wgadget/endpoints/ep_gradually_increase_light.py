@@ -1,3 +1,5 @@
+
+import logging
 from threading import Thread
 
 from exceptions.invalid_api_usage import InvalidAPIUsage
@@ -31,7 +33,6 @@ class EPGraduallyIncreaseLight(object):
         ret['payload-desc'][0]['attribute'] = EPGraduallyIncreaseLight.ATTR_ACTUATOR_ID
         ret['payload-desc'][0]['type'] = 'integer'
         ret['payload-desc'][0]['value'] = 1
-
 
         ret['payload-desc'][1]['attribute'] = EPGraduallyIncreaseLight.ATTR_STEP_VALUE
         ret['payload-desc'][1]['type'] = 'integer'
@@ -69,7 +70,13 @@ class EPGraduallyIncreaseLight(object):
             thread.daemon = True
             thread.start()
 
-            print("                                      POST /actuator", "id=", actuatorId, "startValue=", actualValue, "stepValue=", stepValue, "newValue=", newValue)
+            logging.info( "{0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})  fromValue: {8}, toValue: {9}".format(
+                        EPGraduallyIncreaseLight.METHOD, EPGraduallyIncreaseLight.URL,
+                        EPGraduallyIncreaseLight.ATTR_ACTUATOR_ID, actuatorId,
+                        EPGraduallyIncreaseLight.ATTR_STEP_VALUE, stepValue,
+                        EPGraduallyIncreaseLight.ATTR_IN_SECONDS, inSeconds,
+                        actualValue['current'], newValue)
+            )
 
         else:
             raise InvalidAPIUsage("No such actuator: {0} or step value: {1} or seconds {2}".format(actuatorId, stepValue, inSeconds), status_code=404)

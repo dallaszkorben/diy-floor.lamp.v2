@@ -9,4 +9,4 @@ class ConfigLocation:
 
     @staticmethod 
     def get_path_to_config_folder():
-        return os.path.join(Config.HOME, Config.CONFIG_FOLDER)
+        return os.path.join(ConfigLocation.HOME, ConfigLocation.CONFIG_FOLDER)

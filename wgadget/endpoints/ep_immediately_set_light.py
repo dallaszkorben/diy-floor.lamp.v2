@@ -1,3 +1,5 @@
+
+import logging
 from exceptions.invalid_api_usage import InvalidAPIUsage
 
 class EPImmediatelySetLight(object):
@@ -65,7 +67,11 @@ class EPImmediatelySetLight(object):
                     # Save the light value and set the Light
                     self.web_gadget.setLight(value)
 
-                print("                                      POST /actuator", "id=", actuatorId, "value=", value)
+                    logging.info( "{0} {1} ('{2}': {3}, '{4}': {5})".format(
+                        EPImmediatelySetLight.METHOD, EPImmediatelySetLight.URL,
+                        EPImmediatelySetLight.ATTR_ACTUATOR_ID, actuatorId,
+                        EPImmediatelySetLight.ATTR_VALUE, value)
+                    )
 
             else:
                 raise InvalidAPIUsage("The value is not valid: {0}".format(value), status_code=404)

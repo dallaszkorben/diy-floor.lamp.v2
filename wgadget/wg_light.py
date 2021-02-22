@@ -1,3 +1,8 @@
+
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
 from datetime import datetime
 import tzlocal
 import time
@@ -8,7 +13,6 @@ from flask import jsonify
 from flask import session
 from flask_classful import FlaskView, route, request
 
-#from webgadget.representations import output_json
 from wgadget.immediately import ImmediatelyView
 from wgadget.gradually import GraduallyView
 
@@ -20,43 +24,51 @@ from config.config_exchange import getConfigExchange
 from config.config_exchange import setConfigExchange
 from config.config_egadget import getConfigEGadget
 
+from config.config_location import ConfigLocation
+
 class WGLight(object):
 
-    def __init__(self, gadgetName, actuatorLightId, pinPwm, freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch):
-
+#    def __init__(self, gadgetName, actuatorLightId, pinPwm, freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch):
+    def __init__(self):
         cg = getConfigEGadget()
 
-        try:
-            self.POTMETER_MIN = int(cg["potmeter-min"])
-        except(ValueError):
-            self.POTMETER_MIN = 0
-        try:
-            self.POTMETER_MAX = int(cg["potmeter-max"])
-        except(ValueError):
-            self.POTMETER_MAX = 100
-        try:
-            self.POTMETER_STEP = cg["potmeter-min"]
-        except(ValueError):
-            self.POTMETER_STEP = 1
+        self.gadgetName = cg["gadget-name"]
+        logLevel = cg["log-level"]
+        logFileName = cg["log-file-name"]
+        self.actuator1Id = cg["actuator-1-id"]
+        self.actuator1PwmPin = cg["actuator-1-pin"]
+        self.actuator1PwmFreq = cg["actuator-1-freq"]
+        self.actuator1PwmMinDutyCycle = cg["actuator-1-min-duty-cycle"]
+        self.actuator1PwmMaxDutyCycle = cg["actuator-1-max-duty-cycle"]
+        self.sensor1Id = cg["sensor-1-id"]
+        self.sensor1Min = cg["sensor-1-min"]
+        self.sensor1Max = cg["sensor-1-max"]
+        self.sensor1Step = cg["sensor-1-step"]
+        self.sensor1ClockPin = cg["sensor-1-clock-pin"]
+        self.sensor1DataPin = cg["sensor-1-data-pin"]
+        self.sensor1SwitchPin = cg["sensor-1-switch-pin"]
 
-        self.gadgetName = gadgetName
-        self.actuatorLightId = actuatorLightId
-        self.sensorPotmeterId = sensorPotmeterId
+        # LOG 
+        logFolder = ConfigLocation.get_path_to_config_folder()
+        logPath = os.path.join(logFolder, logFileName)
+        logging.basicConfig(
+            handlers=[RotatingFileHandler(logPath, maxBytes=5*1024*1024, backupCount=5)],
+            format='%(asctime)s %(levelname)8s - %(message)s' , 
+            level = logging.ERROR if logLevel == 'ERROR' else logging.WARNING if logLevel == 'WARNING' else logging.INFO if logLevel == 'INFO' else logging.DEBUG if logLevel == 'DEBUG' else 'CRITICAL' )
 
-        self.egLight = EGLight( gadgetName, actuatorLightId, pinPwm,  freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch, self.fetchLightValue, self.saveLightValue )
+        self.egLight = EGLight( self.gadgetName, self.actuator1Id, self.actuator1PwmPin, self.actuator1PwmFreq, self.sensor1Id, self.sensor1ClockPin, self.sensor1DataPin, self.sensor1SwitchPin, self.fetchLightValue, self.saveLightValue )
 
         self.app = Flask(__name__)
 
         # register the end-points
-#        self.ConfigSomethingView.register(self.app, init_argument=self)
         ImmediatelyView.register(self.app, init_argument=self)
         GraduallyView.register(self.app, init_argument=self)
 
     def getLightId(self):
-        return self.actuatorLightId
+        return self.actuator1Id
 
     def getPotmeterId(self):
-        return self.sensorPotmeterId
+        return self.sensor1Id
 
     def unconfigure(self):
         self.egLight.unconfigure()
@@ -108,22 +120,3 @@ class WGLight(object):
 
         setConfigExchange(config_ini)
 
-#if __name__ == "__main__":
-#
-#    PIN_PWM = 18
-#    FREQ_PWM = 800
-#
-#    PIN_CLOCK = 17
-#    PIN_DATA = 27
-#    PIN_SWITCH = 23
-#
-#    GADGET_NAME = "Light"
-#    ACTUATOR_LIGHT_ID = "1"
-#    SENSOR_POTMETER_ID = "1"
-#
-#    wgLight = WGLight( GADGET_NAME, ACTUATOR_LIGHT_ID, PIN_PWM, FREQ_PWM, SENSOR_POTMETER_ID, PIN_CLOCK, PIN_DATA, PIN_SWITCH )
-#
-#    try:
-#        wgLight.run(host= '0.0.0.0')
-#    finally:
-#        wgLight.unconfigure()

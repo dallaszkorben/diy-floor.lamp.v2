@@ -1,29 +1,9 @@
 from time import sleep
+import logging
 
-#if __name__ == "__main__":
-#    from sa import SA
-#    from sa_pwm import SAPwm
-#    from sa_ky040 import SAKy040
-#
-#else:
 from senact.sa_pwm import SAPwm
 from senact.sa_ky040 import SAKy040
 from egadget.eg import EG
-
-#if __name__ == "__main__":
-#    import os
-#    import sys
-#
-#    currentdir = os.path.dirname(os.path.realpath(__file__))
-#    parentdir = os.path.dirname(currentdir)
-#    sys.path.append(parentdir)
-#
-#    from senact.sa_pwm import SAPwm
-#    from senact.sa_ky040 import SAKy040
-#
-#else:
-#    from senact.sa_pwm import SAPwm
-#    from senact.sa_ky040 import SAKy040
 
 class EGLight(EG):
 
@@ -80,7 +60,7 @@ class EGLight(EG):
         else:
             self.setLight(lightValue['current'], 100)
 
-        print( "reset - ", str(lightValue['current']))
+        logging.info("Reset:          " + str(lightValue['current']))
 
     def rotaryChanged(self, value):
 
@@ -95,7 +75,7 @@ class EGLight(EG):
 
         self.setLight(newValue, newValue)
 
-        print( "turned - ", str(newValue))
+        logging.info("rotaryChanged:  " + str(lightValue['current']) + "->" + str(newValue))
 
     def switchPressed(self):
         lightValue = self.fetchLightValue()
@@ -106,12 +86,11 @@ class EGLight(EG):
             self.setLight(newValue, lightValue['current'])
 
         else:
-#            newValue = self.__class__.POTMETER_MAX
             newValue = lightValue['before-off']
             turned = "on"
             self.setLight(newValue, newValue)
 
-        print ("button pressed - turned", turned, "(", newValue, ")")
+        logging.info("Button pressed: " + turned + "->" + str(newValue))
 
     # save the value and change the level of the light
     def setLight(self, lightValue, lightBeforeOff=100):
