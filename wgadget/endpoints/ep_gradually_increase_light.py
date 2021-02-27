@@ -66,10 +66,6 @@ class EPGraduallyIncreaseLight(object):
             newValue = actualValue['current'] + stepValue
             newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
 
-            thread = Thread(target = self.web_gadget.setLightGradually, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
-            thread.daemon = True
-            thread.start()
-
             logging.info( "{0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})  fromValue: {8}, toValue: {9}".format(
                         EPGraduallyIncreaseLight.METHOD, EPGraduallyIncreaseLight.URL,
                         EPGraduallyIncreaseLight.ATTR_ACTUATOR_ID, actuatorId,
@@ -78,8 +74,12 @@ class EPGraduallyIncreaseLight(object):
                         actualValue['current'], newValue)
             )
 
+            thread = Thread(target = self.web_gadget.setLightGradually, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
+            thread.daemon = True
+            thread.start()
+
         else:
-            raise InvalidAPIUsage("No such actuator: {0} or step value: {1} or seconds {2}".format(actuatorId, stepValue, inSeconds), status_code=404)
+            raise InvalidAPIUsage("No such actuator: {0} or step value: {1} or seconds {2}".format(actuatorId, stepValue, inSeconds), error_code=404)
 
         return {'status': 'OK'}
 

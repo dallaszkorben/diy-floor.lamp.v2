@@ -1,4 +1,7 @@
 import json
+
+#from flask_api import status
+
 from flask import Flask
 from flask import jsonify
 from flask import session
@@ -25,11 +28,10 @@ from wgadget.endpoints.ep_immediately_reverse_light import EPImmediatelyReverseL
 # POST Contorl the level of the light
 #
 # curl  --header "Content-Type: application/json" --request POST http://localhost:5000/immediately/set/actuatorId/1/value/10
-# curl  --header "Content-Type: application/json" --request POST --data '{"actuatorId":"1","value":"10"}' http://localhost:5000/immediately/set
+# curl  --header "Content-Type: application/json" --request POST --data '{"actuatorId":1,"value":10}' http://localhost:5000/immediately/set
 #
 # curl  --header "Content-Type: application/json" --request POST http://localhost:5000/immediately/increase/actuatorId/1/stepvalue/-10
-# curl  --header "Content-Type: application/json" --request POST --data '{"actuatorId":"1","stepValue":"-10"}' http://localhost:5000/immediately/increase
-#
+# curl  --header "Content-Type: application/json" --request POST --data '{"actuatorId":1,"stepValue":-10}' http://localhost:5000/immediately/increase
 # -----------------------------------
 #
 # GET http://localhost:5000/immediately
@@ -46,7 +48,7 @@ class ImmediatelyView(FlaskView):
         self.epImmediatelyReverseLight = EPImmediatelyReverseLight(web_gadget)
 
     #
-    # GET http://localhost:5000/set/
+    # GET http://localhost:5000/immediately/
     #
     def index(self):
         return {}
@@ -104,7 +106,7 @@ class ImmediatelyView(FlaskView):
     #
     # Increase the light value immediately with payload
     #
-    # curl  --header "Content-Type: application/json" --request POST --data '{"actuatorId":1,"stepValue":-10}' http://localhost:5000/imediately/increase
+    # curl  --header "Content-Type: application/json" --request POST --data '{"actuatorId":1,"stepValue":-10}' http://localhost:5000/immediately/increase
     #
     # POST http://localhost:5000/imediately/increase
     #      body: {
@@ -146,9 +148,7 @@ class ImmediatelyView(FlaskView):
 
         return {'status': 'OK'}
 
-
 # ===
-
 
     #
     # Reverse the light value immediately with payload
@@ -157,7 +157,7 @@ class ImmediatelyView(FlaskView):
     #
     # POST http://localhost:5000/immediately/reverse
     #      body: {
-    #                'actuatorId': "1'
+    #                'actuatorId': 1
     #           }
     #
     #@route('/reverse', methods=['POST'])

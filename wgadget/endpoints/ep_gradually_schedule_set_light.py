@@ -1,7 +1,7 @@
 from threading import Thread
 from datetime import datetime
-
 from exceptions.invalid_api_usage import InvalidAPIUsage
+import logging
 
 class EPGraduallyScheduleSetLight(object):
 
@@ -70,12 +70,18 @@ class EPGraduallyScheduleSetLight(object):
 
             if value >= 0 and value <= 100:
 
+                logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7}, '{8}': {9})".format(
+                    EPGraduallyScheduleSetLight.METHOD, EPGraduallyScheduleSetLight.URL,
+                    EPGraduallyScheduleSetLight.ATTR_ACTUATOR_ID, actuatorId,
+                    EPGraduallyScheduleSetLight.ATTR_VALUE, value,
+                    EPGraduallyScheduleSetLight.ATTR_IN_SECONDS, inSeconds,
+                    EPGraduallyScheduleSetLight.ATTR_AT_DATE_TIME, atDateTime)
+                )
+
                 # Save the light value and set the Light
                 thread = Thread(target = self.web_gadget.setLightScheduledGradually, args = (actuatorId, value, inSeconds, atDateTime)) 
                 thread.daemon = True
                 thread.start()
-
-                print("                                      POST /actuator", "actuatorId=", actuatorId, "startValue=", "value=", value, "inSeconds=", inSeconds, "at=", atDateTime)
 
             else:
                 raise InvalidAPIUsage("The value is not valid: {0}".format(value), status_code=404)

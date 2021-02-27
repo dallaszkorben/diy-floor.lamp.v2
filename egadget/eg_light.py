@@ -75,8 +75,6 @@ class EGLight(EG):
 
         self.setLight(newValue, newValue)
 
-        logging.info("rotaryChanged:  " + str(lightValue['current']) + "->" + str(newValue))
-
     def switchPressed(self):
         lightValue = self.fetchLightValue()
 
@@ -90,15 +88,37 @@ class EGLight(EG):
             turned = "on"
             self.setLight(newValue, newValue)
 
-        logging.info("Button pressed: " + turned + "->" + str(newValue))
-
     # save the value and change the level of the light
     def setLight(self, lightValue, lightBeforeOff=100):
         self.saveLightValue(lightValue, lightBeforeOff)
+
+        if lightValue:
+            logging.info( "Set Light to {0} in {1})".format(
+                lightValue,
+                __file__)
+            )
+
+        else:
+            logging.info( "Set Light to {0} from {1} --- FILE: {2}".format(
+                lightValue,
+                lightBeforeOff,
+                __file__)
+            )
+
         pwmValue = self.saPwm.setPwmByValue(lightValue)
 
+
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
+
+        logging.info( "Set Light to {0} from {1} in {2} seconds --- FILE: {3}".format(
+            toValue,
+            fromValue,
+            inSeconds,
+            __file__)
+        )
+
         pwmValue = self.saPwm.setPwmByStepValueGradually(actuator, fromValue, toValue, inSeconds)
         self.saveLightValue(toValue)
+
 
 

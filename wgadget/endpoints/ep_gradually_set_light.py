@@ -1,6 +1,6 @@
 from threading import Thread
-
 from exceptions.invalid_api_usage import InvalidAPIUsage
+import logging
 
 class EPGraduallySetLight(object):
 
@@ -64,12 +64,17 @@ class EPGraduallySetLight(object):
                 actualValue = self.web_gadget.fetchLightValue()
                 newValue = value
 
+                logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})".format(
+                    EPGraduallySetLight.METHOD, EPGraduallySetLight.URL,
+                    EPGraduallySetLight.ATTR_ACTUATOR_ID, actuatorId,
+                    EPGraduallySetLight.ATTR_VALUE, value,
+                    EPGraduallySetLight.ATTR_IN_SECONDS, inSeconds)
+                )
+
                 # Save the light value and set the Light
                 thread = Thread(target = self.web_gadget.setLightGradually, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
                 thread.daemon = True
                 thread.start()
-
-                print("                                      POST /actuator", "actuatorId=", actuatorId, "startValue=", actualValue['current'], "newValue=", newValue, "inSeconds=", inSeconds)
 
             else:
                 raise InvalidAPIUsage("The value is not valid: {0}".format(value), status_code=404)

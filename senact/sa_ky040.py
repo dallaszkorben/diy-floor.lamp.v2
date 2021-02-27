@@ -6,6 +6,8 @@ from time import time
 from threading import Thread
 from senact.senact import SenAct
 
+import logging
+
 #if __name__ == "__main__":
 #from sa import SA
 #else:

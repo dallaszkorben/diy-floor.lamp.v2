@@ -17,14 +17,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 from converter import Converter
 
-#else:
-#    from senact.sa import SA
-#    from converter import Converter
-
-
-#actuators = {
-#    '1':{'pin': PIN_PWM, 'freq': PWM_FREQ, 'min-duty-cycle': MIN_DUTY_CYCLE, 'max-duty-cycle': MAX_DUTY_CYCLE}
-#}
+import logging
 
 class SAPwm(SA):
 
@@ -61,6 +54,14 @@ class SAPwm(SA):
         # Change the Duty Cycle
         self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
+        logging.debug( "Set PWM Duty Cycle to {0} (<-{1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
+            fadeValue,
+            value,
+            self.pwmFreq,
+            self.pwmPin,
+            __file__)
+        )
+
         return fadeValue
 
     def setPwmByStepValueGradually(self, actuator, fromValue, toValue, inSeconds):
@@ -68,12 +69,14 @@ class SAPwm(SA):
         diff = toValue - fromValue
 
         if diff == 0:
-            print("already done  value:", toValue)
+            logging.debug("PWM Duty Cycle did not change as the value {0} (<-{1})was already set --- FILE: {2}".format(
+                Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
+                toValue,
+                __file__)
+            )
             return
 
         secInOneStep = abs(inSeconds / diff)
-
-        print("fromValue:", fromValue, "toValue:", toValue, "inSeconds:", inSeconds)
 
         if diff >= 0:
             par1 = fromValue
@@ -85,16 +88,31 @@ class SAPwm(SA):
             par2 = toValue - 1
             par3 = -1
 
-        print("par1:", par1, "par2:", par2, "par3:", par3)
+        logging.debug("Set PWM Duty Cycle gradually from {0} (<-{1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
+            Converter.getLinearValueToExponential(fromValue, self.maxValue, self.maxDutyCycle),
+            fromValue,
+            Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
+            toValue,
+            inSeconds,
+            __file__)
+        )
 
         for value in range(par1, par2, par3):
-            print("waiting:", secInOneStep, "value: ", value)
+            #print("waiting:", secInOneStep, "value: ", value)
             sleep(secInOneStep)
 
             fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
             self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
-        print("done  value:", toValue)
+            logging.debug( "    Set to {0} (<-{1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
+                fadeValue,
+                value,
+                self.pwmFreq,
+                self.pwmPin,
+                __file__)
+            )
+
+        logging.debug("Set PWM Duty Cycle gradually is done")
 
         return
 

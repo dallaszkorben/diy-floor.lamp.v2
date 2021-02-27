@@ -1,4 +1,5 @@
 from exceptions.invalid_api_usage import InvalidAPIUsage
+import logging
 
 class EPImmediatelyReverseLight(object):
 
@@ -42,6 +43,11 @@ class EPImmediatelyReverseLight(object):
         actuatorId = payload[EPImmediatelyReverseLight.ATTR_ACTUATOR_ID]
 
         if actuatorId == self.web_gadget.getLightId():
+
+            logging.info( "WEB request: {0} {1} ('{2}': {3})".format(
+                EPImmediatelyReverseLight.METHOD, EPImmediatelyReverseLight.URL,
+                EPImmediatelyReverseLight.ATTR_ACTUATOR_ID, actuatorId)
+            )
 
             # Save the light value and set the Light
             self.web_gadget.reverseLight()

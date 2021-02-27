@@ -57,6 +57,12 @@ class EPImmediatelySetLight(object):
 
                 actualValue = self.web_gadget.fetchLightValue()
 
+                logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
+                    EPImmediatelySetLight.METHOD, EPImmediatelySetLight.URL,
+                    EPImmediatelySetLight.ATTR_ACTUATOR_ID, actuatorId,
+                    EPImmediatelySetLight.ATTR_VALUE, value)
+                )
+
                 if value == 0 and actualValue['current']:
 
                     # Save the light value and set the Light
@@ -67,14 +73,9 @@ class EPImmediatelySetLight(object):
                     # Save the light value and set the Light
                     self.web_gadget.setLight(value)
 
-                    logging.info( "{0} {1} ('{2}': {3}, '{4}': {5})".format(
-                        EPImmediatelySetLight.METHOD, EPImmediatelySetLight.URL,
-                        EPImmediatelySetLight.ATTR_ACTUATOR_ID, actuatorId,
-                        EPImmediatelySetLight.ATTR_VALUE, value)
-                    )
 
             else:
-                raise InvalidAPIUsage("The value is not valid: {0}".format(value), status_code=404)
+                raise InvalidAPIUsage("The value is not valid: {0}".format(value), error_code=404)
 
         else:
-            raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(actuatorId, value), status_code=404)
+            raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(actuatorId, value), error_code=404)
