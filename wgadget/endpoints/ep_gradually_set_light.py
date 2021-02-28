@@ -1,8 +1,9 @@
 from threading import Thread
 from exceptions.invalid_api_usage import InvalidAPIUsage
 import logging
+from wgadget.endpoints.ep import EP
 
-class EPGraduallySetLight(object):
+class EPGraduallySetLight(EP):
 
     NAME = 'set_light_gradually'
     URL = '/gradually/set'

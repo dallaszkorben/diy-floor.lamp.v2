@@ -1,8 +1,9 @@
 
 import logging
 from exceptions.invalid_api_usage import InvalidAPIUsage
+from wgadget.endpoints.ep import EP
 
-class EPImmediatelySetLight(object):
+class EPImmediatelySetLight(EP):
 
     NAME = 'set_light_immediately'
     URL = '/immediately/set'

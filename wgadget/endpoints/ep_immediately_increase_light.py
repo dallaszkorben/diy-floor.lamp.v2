@@ -1,7 +1,8 @@
 from exceptions.invalid_api_usage import InvalidAPIUsage
 import logging
+from wgadget.endpoints.ep import EP
 
-class EPImmediatelyIncreaseLight(object):
+class EPImmediatelyIncreaseLight(EP):
 
     NAME = 'increase_light_immediately'
     URL = '/immediately/increase'

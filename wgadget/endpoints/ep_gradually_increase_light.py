@@ -1,10 +1,10 @@
 
 import logging
 from threading import Thread
-
 from exceptions.invalid_api_usage import InvalidAPIUsage
+from wgadget.endpoints.ep import EP
 
-class EPGraduallyIncreaseLight(object):
+class EPGraduallyIncreaseLight(EP):
 
     NAME = 'increase_light_gradually'
     URL = '/gradually/increase'

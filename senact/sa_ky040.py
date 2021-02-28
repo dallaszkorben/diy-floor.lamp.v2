@@ -80,6 +80,12 @@ class SAKy040(SA):
 
         if GPIO.input(self.dataPin) == 1:
 
+            logging.debug( "Received 1->0 on KY040 clock PIN #{0} while 1 on data PIN #{1} (clockwise turn)--- FILE: {2}".format(
+                self.clockPin,
+                self.dataPin,
+                __file__)
+            )
+
             current_time = time()
             diff = current_time - self.last_change_time
 
@@ -106,10 +112,16 @@ class SAKy040(SA):
         else:
             pass
 
-    # couter clockwise turn
+    # counter clockwise turn
     def _dataFallingCallback(self, pin):
 
         if GPIO.input(self.clockPin) == 1:
+
+            logging.debug( "Received 1->0 on KY040 data PIN #{0} while 1 on clock PIN #{1} (counter clockwise turn) --- FILE: {2}".format(
+                self.dataPin,
+                self.clockPin,
+                __file__)
+            )
 
             current_time = time()
             diff = current_time - self.last_change_time
@@ -139,6 +151,12 @@ class SAKy040(SA):
 
     def _switchCallback(self, pin):
         if GPIO.input(self.switchPin) == 0:
+
+            logging.debug( "Received 0 on KY040 switch PIN #{0} --- FILE: {1}".format(
+                self.switchPin,
+                __file__)
+            )
+
             self.switchCallback()
 
 #test

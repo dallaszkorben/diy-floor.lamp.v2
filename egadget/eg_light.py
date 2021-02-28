@@ -66,14 +66,15 @@ class EGLight(EG):
 
         lightValue = self.fetchLightValue()
 
-        newValue = lightValue['current'] + value
+        oldValue = lightValue['current']
+        newValue = oldValue + value
 
         if newValue > EGLight.POTMETER_MAX:
             newValue = EGLight.POTMETER_MAX
         elif newValue < EGLight.POTMETER_MIN:
             newValue = EGLight.POTMETER_MIN
 
-        self.setLight(newValue, newValue)
+        self.setLight(newValue, oldValue)
 
     def switchPressed(self):
         lightValue = self.fetchLightValue()
@@ -84,24 +85,26 @@ class EGLight(EG):
             self.setLight(newValue, lightValue['current'])
 
         else:
+            oldValue = lightValue['current']
             newValue = lightValue['before-off']
             turned = "on"
-            self.setLight(newValue, newValue)
+            self.setLight(newValue, oldValue)
 
     # save the value and change the level of the light
     def setLight(self, lightValue, lightBeforeOff=100):
         self.saveLightValue(lightValue, lightBeforeOff)
 
-        if lightValue:
-            logging.info( "Set Light to {0} in {1})".format(
-                lightValue,
-                __file__)
-            )
-
-        else:
-            logging.info( "Set Light to {0} from {1} --- FILE: {2}".format(
-                lightValue,
+#        if lightValue:
+#            logging.info( "Set Light to {0} in {1})".format(
+#                lightValue,
+#                __file__)
+#            )
+#
+#        else:
+        if True:
+            logging.info( "Set Light {0} -> {1} --- FILE: {2}".format(
                 lightBeforeOff,
+                lightValue,
                 __file__)
             )
 
@@ -110,9 +113,9 @@ class EGLight(EG):
 
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
 
-        logging.info( "Set Light to {0} from {1} in {2} seconds --- FILE: {3}".format(
-            toValue,
+        logging.info( "Set Light {0} -...-> {1} in {2} seconds --- FILE: {3}".format(
             fromValue,
+            toValue,
             inSeconds,
             __file__)
         )

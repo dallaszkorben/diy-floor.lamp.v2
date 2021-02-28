@@ -54,7 +54,7 @@ class SAPwm(SA):
         # Change the Duty Cycle
         self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
-        logging.debug( "Set PWM Duty Cycle to {0} (<-{1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
+        logging.debug( "Set PWM Duty Cycle to {0} (<-{1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
             fadeValue,
             value,
             self.pwmFreq,

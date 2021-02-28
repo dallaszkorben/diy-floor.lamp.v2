@@ -2,8 +2,9 @@ from threading import Thread
 from datetime import datetime
 from exceptions.invalid_api_usage import InvalidAPIUsage
 import logging
+from wgadget.endpoints.ep import EP
 
-class EPGraduallyScheduleSetLight(object):
+class EPGraduallyScheduleSetLight(EP):
 
     NAME = 'scheduled_set_light_gradually'
     URL = '/gradually/schedule/set'

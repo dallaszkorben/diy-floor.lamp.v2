@@ -1,7 +1,8 @@
 from exceptions.invalid_api_usage import InvalidAPIUsage
 import logging
+from wgadget.endpoints.ep import EP
 
-class EPImmediatelyReverseLight(object):
+class EPImmediatelyReverseLight(EP):
 
     NAME = 'reverse_light_immediately'
     URL = '/immediately/reverse'
