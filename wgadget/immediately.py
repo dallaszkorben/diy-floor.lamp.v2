@@ -23,6 +23,8 @@ from wgadget.endpoints.ep_immediately_set_light import EPImmediatelySetLight
 from wgadget.endpoints.ep_immediately_increase_light import EPImmediatelyIncreaseLight
 from wgadget.endpoints.ep_immediately_reverse_light import EPImmediatelyReverseLight
 
+from wgadget.crossdomain import crossdomain
+
 # -----------------------------------
 #
 # POST Contorl the level of the light
@@ -79,12 +81,11 @@ class ImmediatelyView(FlaskView):
             json_data = request.json
 
         else:
-            return {}
+            return "Not valid request", 400
 
-        self.epImmediatelySetLight.executeByPayload(json_data)
-
-        return {'status': 'OK'}
-
+        resp = self.epImmediatelySetLight.executeByPayload(json_data)
+        result = json.dumps(resp) 
+        return result
 
     #
     # Set the light value immediately
@@ -97,9 +98,9 @@ class ImmediatelyView(FlaskView):
     @route(EPImmediatelySetLight.URL_ROUTE_PAR_URL, methods=[EPImmediatelySetLight.METHOD])
     def set(self, actuatorId, value):
 
-        self.epImmediatelySetLight.executeByParameters(actuatorId=actuatorId, value=value)
-
-        return {'status': 'OK'}
+        resp = self.epImmediatelySetLight.executeByParameters(actuatorId=actuatorId, value=value)
+        result = json.dumps(resp) 
+        return result
 
 # ===
 
@@ -127,11 +128,11 @@ class ImmediatelyView(FlaskView):
             json_data = request.json
 
         else:
-            return {}
+            return "Not valid request", 400
 
-        self.epImmediatelyIncreaseLight.executeByPayload(json_data)
-
-        return {'status': 'OK'}
+        resp = self.epImmediatelyIncreaseLight.executeByPayload(json_data)
+        result = json.dumps(resp) 
+        return result
 
     #
     # Increase the light value immediately
@@ -144,9 +145,9 @@ class ImmediatelyView(FlaskView):
     @route(EPImmediatelyIncreaseLight.URL_ROUTE_PAR_URL, methods=[EPImmediatelyIncreaseLight.METHOD])
     def increase(self, actuatorId, stepValue):
 
-        self.epImmediatelyIncreaseLight.executeByParameters(actuatorId=actuatorId, stepValue=stepValue)
-
-        return {'status': 'OK'}
+        resp = self.epImmediatelyIncreaseLight.executeByParameters(actuatorId=actuatorId, stepValue=stepValue)
+        result = json.dumps(resp) 
+        return result
 
 # ===
 
@@ -173,11 +174,11 @@ class ImmediatelyView(FlaskView):
             json_data = request.json
 
         else:
-            return {}
+            return "Not valid request", 400
 
-        self.epImmediatelyReverseLight.executeByPayload(json_data)
-
-        return {'status': 'OK'}
+        resp = self.epImmediatelyReverseLight.executeByPayload(json_data)
+        result = json.dumps(resp) 
+        return result
 
 
     #
@@ -191,6 +192,6 @@ class ImmediatelyView(FlaskView):
     @route(EPImmediatelyReverseLight.URL_ROUTE_PAR_URL, methods=[EPImmediatelySetLight.METHOD])
     def reverse(self, actuatorId):
 
-        self.epImmediatelyReverseLight.executeByParameters(actuatorId=actuatorId)
-
-        return {'status': 'OK'}
+        resp = self.epImmediatelyReverseLight.executeByParameters(actuatorId=actuatorId)
+        result = json.dumps(resp) 
+        return result

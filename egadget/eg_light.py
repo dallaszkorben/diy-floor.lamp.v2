@@ -62,7 +62,7 @@ class EGLight(EG):
 
         logging.info("Reset:          " + str(lightValue['current']))
 
-    def rotaryChanged(self, value):
+    def rotaryChanged(self, value) -> dict:
 
         lightValue = self.fetchLightValue()
 
@@ -74,42 +74,37 @@ class EGLight(EG):
         elif newValue < EGLight.POTMETER_MIN:
             newValue = EGLight.POTMETER_MIN
 
-        self.setLight(newValue, oldValue)
+        return self.setLight(newValue, oldValue)
 
-    def switchPressed(self):
+    def switchPressed(self) -> dict:
         lightValue = self.fetchLightValue()
 
         if lightValue['current']:
             newValue = EGLight.POTMETER_MIN
+            oldValue = lightValue['current']
             turned = "off"
-            self.setLight(newValue, lightValue['current'])
+#            self.setLight(newValue, lightValue['current'])
 
         else:
             oldValue = lightValue['current']
             newValue = lightValue['before-off']
             turned = "on"
-            self.setLight(newValue, oldValue)
+
+        return self.setLight(newValue, oldValue)
 
     # save the value and change the level of the light
-    def setLight(self, lightValue, lightBeforeOff=100):
+    def setLight(self, lightValue, lightBeforeOff=100) -> dict:
         self.saveLightValue(lightValue, lightBeforeOff)
 
-#        if lightValue:
-#            logging.info( "Set Light to {0} in {1})".format(
-#                lightValue,
-#                __file__)
-#            )
-#
-#        else:
-        if True:
-            logging.info( "Set Light {0} -> {1} --- FILE: {2}".format(
-                lightBeforeOff,
-                lightValue,
-                __file__)
-            )
+        logging.info( "Set Light {0} -> {1} --- FILE: {2}".format(
+            lightBeforeOff,
+            lightValue,
+            __file__)
+        )
 
         pwmValue = self.saPwm.setPwmByValue(lightValue)
 
+        return {'result': 'OK', 'value': lightValue}
 
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
 

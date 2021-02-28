@@ -56,9 +56,9 @@ class EPGraduallyIncreaseLight(EP):
 
     def executeByPayload(self, payload):
 
-        actuatorId = payload[EPGraduallyIncreaseLight.ATTR_ACTUATOR_ID]
-        stepValue = payload[EPGraduallyIncreaseLight.ATTR_STEP_VALUE]
-        inSeconds = payload[EPGraduallyIncreaseLight.ATTR_IN_SECONDS]
+        actuatorId = int(payload[EPGraduallyIncreaseLight.ATTR_ACTUATOR_ID])
+        stepValue = int(payload[EPGraduallyIncreaseLight.ATTR_STEP_VALUE])
+        inSeconds = int(payload[EPGraduallyIncreaseLight.ATTR_IN_SECONDS])
 
         if actuatorId == self.web_gadget.getLightId():
 

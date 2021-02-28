@@ -32,16 +32,16 @@ class EPImmediatelyReverseLight(EP):
 
         return ret
 
-    def executeByParameters(self, actuatorId):
+    def executeByParameters(self, actuatorId) -> dict:
 
         payload = {}
         payload[EPImmediatelyReverseLight.ATTR_ACTUATOR_ID] = int(actuatorId)
-        self.executeByPayload(payload)
+        return self.executeByPayload(payload)
 
 
-    def executeByPayload(self, payload):
+    def executeByPayload(self, payload) -> dict:
 
-        actuatorId = payload[EPImmediatelyReverseLight.ATTR_ACTUATOR_ID]
+        actuatorId = int(payload[EPImmediatelyReverseLight.ATTR_ACTUATOR_ID])
 
         if actuatorId == self.web_gadget.getLightId():
 
@@ -51,7 +51,7 @@ class EPImmediatelyReverseLight(EP):
             )
 
             # Save the light value and set the Light
-            self.web_gadget.reverseLight()
+            return self.web_gadget.reverseLight()
 
         else:
             raise InvalidAPIUsage("No such actuator: {0}".format(actuatorId), status_code=404)

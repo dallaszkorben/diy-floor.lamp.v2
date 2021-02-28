@@ -40,17 +40,17 @@ class EPImmediatelySetLight(EP):
 
         return ret
 
-    def executeByParameters(self, actuatorId, value):
+    def executeByParameters(self, actuatorId, value) -> dict:
         payload = {}
         payload[EPImmediatelySetLight.ATTR_ACTUATOR_ID] = int(actuatorId)
         payload[EPImmediatelySetLight.ATTR_VALUE] = int(value)
-        self.executeByPayload(payload)
+        return self.executeByPayload(payload)
 
 
-    def executeByPayload(self, payload):
+    def executeByPayload(self, payload) -> dict:
 
-        actuatorId = payload[EPImmediatelySetLight.ATTR_ACTUATOR_ID]
-        value = payload[EPImmediatelySetLight.ATTR_VALUE]
+        actuatorId = int(payload[EPImmediatelySetLight.ATTR_ACTUATOR_ID])
+        value = int(payload[EPImmediatelySetLight.ATTR_VALUE])
 
         if actuatorId == self.web_gadget.getLightId():
 
@@ -67,12 +67,12 @@ class EPImmediatelySetLight(EP):
                 if value == 0 and actualValue['current']:
 
                     # Save the light value and set the Light
-                    self.web_gadget.setLight(value, actualValue['current'])
+                    return self.web_gadget.setLight(value, actualValue['current'])
 
                 else:
 
                     # Save the light value and set the Light
-                    self.web_gadget.setLight(value)
+                    return self.web_gadget.setLight(value)
 
 
             else:

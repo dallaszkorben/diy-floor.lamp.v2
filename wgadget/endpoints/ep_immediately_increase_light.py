@@ -39,17 +39,17 @@ class EPImmediatelyIncreaseLight(EP):
 
         return ret
 
-    def executeByParameters(self, actuatorId, stepValue):
+    def executeByParameters(self, actuatorId, stepValue) -> dict:
         payload = {}
         payload[EPImmediatelyIncreaseLight.ATTR_ACTUATOR_ID] = int(actuatorId)
         payload[EPImmediatelyIncreaseLight.ATTR_STEP_VALUE] = int(stepValue)
-        self.executeByPayload(payload)
+        return self.executeByPayload(payload)
 
 
-    def executeByPayload(self, payload):
+    def executeByPayload(self, payload) -> dict:
 
-        actuatorId = payload[EPImmediatelyIncreaseLight.ATTR_ACTUATOR_ID]
-        stepValue = payload[EPImmediatelyIncreaseLight.ATTR_STEP_VALUE]
+        actuatorId = int(payload[EPImmediatelyIncreaseLight.ATTR_ACTUATOR_ID])
+        stepValue = int(payload[EPImmediatelyIncreaseLight.ATTR_STEP_VALUE])
 
         actualValue = self.web_gadget.fetchLightValue()
         newValue = actualValue['current'] + stepValue
@@ -64,10 +64,10 @@ class EPImmediatelyIncreaseLight(EP):
             )
 
             # Save the light value and set the Light
-            self.web_gadget.setLight(newValue)
+            return self.web_gadget.setLight(newValue)
 
         else:
             raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(actuatorId, newValue), status_code=404)
 
-        return {'status': 'OK'}
+#        return {'status': 'OK'}
 

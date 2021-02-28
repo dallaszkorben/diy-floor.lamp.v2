@@ -12,6 +12,7 @@ from flask import Flask
 from flask import jsonify
 from flask import session
 from flask_classful import FlaskView, route, request
+from flask_cors import CORS
 
 from wgadget.immediately import ImmediatelyView
 from wgadget.gradually import GraduallyView
@@ -60,6 +61,9 @@ class WGLight(object):
 
         self.app = Flask(__name__)
 
+        # This will enable CORS for all routes
+        CORS(self.app)
+
         # register the end-points
         ImmediatelyView.register(self.app, init_argument=self)
         GraduallyView.register(self.app, init_argument=self)
@@ -74,13 +78,14 @@ class WGLight(object):
         self.egLight.unconfigure()
 
     def run(self, host='0.0.0.0'):
-        self.app.run(host=host)
+        self.app.run(host=host, debug=False)
+#        self.app.run()
 
-    def setLight(self, value, beforeOffValue=100):
-        self.egLight.setLight(value, beforeOffValue)
+    def setLight(self, value, beforeOffValue=100) -> dict:
+        return self.egLight.setLight(value, beforeOffValue)
 
     def reverseLight(self):
-        self.egLight.switchPressed()
+        return self.egLight.switchPressed()
 
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
         self.egLight.setLightGradually(actuator, fromValue, toValue, inSeconds)

@@ -62,10 +62,10 @@ class EPGraduallyScheduleSetLight(EP):
 
     def executeByPayload(self, payload):
 
-        actuatorId = payload[EPGraduallyScheduleSetLight.ATTR_ACTUATOR_ID]
-        value = payload[EPGraduallyScheduleSetLight.ATTR_VALUE]
-        inSeconds = payload[EPGraduallyScheduleSetLight.ATTR_IN_SECONDS]
-        atDateTime = datetime.fromisoformat(payload[EPGraduallyScheduleSetLight.ATTR_AT_DATE_TIME])
+        actuatorId = int(payload[EPGraduallyScheduleSetLight.ATTR_ACTUATOR_ID])
+        value = int(payload[EPGraduallyScheduleSetLight.ATTR_VALUE])
+        inSeconds = int(payload[EPGraduallyScheduleSetLight.ATTR_IN_SECONDS])
+        atDateTime = int(datetime.fromisoformat(payload[EPGraduallyScheduleSetLight.ATTR_AT_DATE_TIME]))
 
         if actuatorId == self.web_gadget.getLightId():
 
