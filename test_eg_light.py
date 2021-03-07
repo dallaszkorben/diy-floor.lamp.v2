@@ -1,31 +1,91 @@
 #! /usr/bin/python3
 
-from egadget.eg_light import EGLight
+import os
 from time import sleep
+from senact.sa_ky040 import SAKy040
+from senact.sa_pwm import SAPwm
+from egadget.eg_light import EGLight
 
+import logging
+from logging.handlers import RotatingFileHandler
+
+
+#test
 if __name__ == "__main__":
 
-    PIN_PWM = 18
-    FREQ_PWM = 800
+    SENSOR_ID = 1
 
-    PIN_CLOCK = 17
-    PIN_DATA = 27
-    PIN_SWITCH = 23
+    CLOCK_PIN = 17
+    DATA_PIN = 27
+    SWITCH_PIN = 23
 
-    potmeterValue = 0
+    ACTUATOR_ID = 1
 
-    def getPotmeterValue():
-        global potmeterValue
-        return potmeterValue
+    PWM_PIN = 18
+    PWM_FREQ = 800
 
-    def setPotmeterValue(value):
-        global potmeterValue
-        potmeterValue = value;
+    DIR_UP = 1
+    DIR_DOWN = -1
 
-    saLight = EGLight( "Lamp", "1", PIN_PWM, FREQ_PWM, "1", PIN_CLOCK, PIN_DATA, PIN_SWITCH, getPotmeterValue, setPotmeterValue )
+    def switchCallback():
+
+        lightValue = egLight.lightValue
+
+        print(lightValue)
+
+        if lightValue['current'] > egLight.minLightValue:
+            fromValue = lightValue['current']
+            toValue = egLight.minLightValue
+            turned = "off"
+
+        else:
+            fromValue = egLight.minLightValue
+
+            if lightValue['current'] == lightValue['previous']:
+                toValue = egLight.maxLightValue
+            else:
+                toValue = lightValue['previous']
+            turned = "on"
+
+        print("Switch started")
+        result = egLight.setLightGradually(ACTUATOR_ID, fromValue, toValue, 3)
+        print(result)
+
+        return result
+
+    def rotaryCallback(value):
+
+        result = egLight.rotaryCallbackMethod(value)
+        print(result)
+
+        return result
+
+    # LOG 
+    logPath = os.path.join(".", "test.log")
+    logLevel = "INFO" #"DEBUG"
+    logging.basicConfig(
+        handlers=[RotatingFileHandler(logPath, maxBytes=5*1024*1024, backupCount=5)],
+        format='%(asctime)s %(levelname)8s - %(message)s' , 
+        level = logging.ERROR if logLevel == 'ERROR' else logging.WARNING if logLevel == 'WARNING' else logging.INFO if logLevel == 'INFO' else logging.DEBUG if logLevel == 'DEBUG' else 'CRITICAL' )
+
+
+    saPwm = SAPwm(ACTUATOR_ID, PWM_PIN, PWM_FREQ)
+    saKy040 = SAKy040(SENSOR_ID, CLOCK_PIN, DATA_PIN, SWITCH_PIN)
+
+    egLight = EGLight( "Light", saPwm, saKy040, fetchSavedLightValue=None, saveLightValue=None, switchCallbackMethod=switchCallback, rotaryCallbackMethod=rotaryCallback )
+
+    print(egLight.getGadgetName(), 'has started')
 
     try:
         while True:
             sleep(10)
     finally:
-        saLight.unconfigure()
+        egLight.unconfigure()
+
+
+
+
+
+
+
+

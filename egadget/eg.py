@@ -4,6 +4,9 @@ from senact.senact import SenAct
 
 class EG:
 
+    def getGadgetName(self):
+        raise NotImplementedError(f"{inspect.currentframe().f_code.co_name}() is not implemented")
+
     def getSensor(self, id):
         raise NotImplementedError(f"{inspect.currentframe().f_code.co_name}() is not implemented")
 

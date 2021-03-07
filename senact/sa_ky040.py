@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 from time import sleep
 from time import time
 from threading import Thread
+from threading import Lock
 from senact.senact import SenAct
 
 import logging
@@ -26,7 +27,9 @@ class SAKy040(SA):
 
     SENACT_TYPE = SenAct.SENSOR
 
-    def __init__(self, id, clockPin, dataPin, switchPin, rotaryCallback, switchCallback):
+    def __init__(self, id, clockPin, dataPin, switchPin, rotaryCallback=None, switchCallback=None):
+
+        self.lock = Lock()
 
         GPIO.setmode(GPIO.BCM)
 
@@ -50,6 +53,12 @@ class SAKy040(SA):
 
     def getSenactId(self):
         return self.id
+
+    def setRotaryCallbackMethod(self, rotaryCallback):
+        self.rotaryCallback = rotaryCallback
+
+    def setSwitchCallbackMethod(self, switchCallback):
+        self.switchCallback = switchCallback
 
     def configure(self):
 
@@ -80,34 +89,36 @@ class SAKy040(SA):
 
         if GPIO.input(self.dataPin) == 1:
 
-            logging.debug( "Received 1->0 on KY040 clock PIN #{0} while 1 on data PIN #{1} (clockwise turn)--- FILE: {2}".format(
-                self.clockPin,
-                self.dataPin,
-                __file__)
-            )
+            with self.lock:
 
-            current_time = time()
-            diff = current_time - self.last_change_time
+                logging.debug( "Received 1->0 on KY040 'CLOCK' PIN #{0} while 1 on 'DATA' PIN #{1} (clockwise turn)--- FILE: {2}".format(
+                    self.clockPin,
+                    self.dataPin,
+                    __file__)
+                )
 
-            change = self.STANDBY
+                current_time = time()
+                diff = current_time - self.last_change_time
 
-            # if more than 1 sec elapsed since the last change
-            if(diff >= self.__class__.MIN_DIFF_TIME):
+                change = self.STANDBY
 
-                # then anything this operation is allowed with normal speed
-                change = self.__class__.INCREASE_SLOW
+                # if more than 1 sec elapsed since the last change
+                if(diff >= self.__class__.MIN_DIFF_TIME):
 
-            # if less than 1 sec elapsed since the last change 
-            # and the previous direction was clockwise
-            elif self.last_change > 0 :
+                    # then anything this operation is allowed with normal speed
+                    change = self.__class__.INCREASE_SLOW
 
-                # then only 
-                change = self.__class__.INCREASE_FAST
+                # if less than 1 sec elapsed since the last change 
+                # and the previous direction was clockwise
+                elif self.last_change > 0 :
 
-            if not change == self.STANDBY:
-                self.last_change = change
-                self.last_change_time = time()
-                self.rotaryCallback(change)
+                    # then only 
+                    change = self.__class__.INCREASE_FAST
+
+                if self.rotaryCallback and not change == self.STANDBY:
+                    self.last_change = change
+                    self.last_change_time = time()
+                    self.rotaryCallback(change)
 
         else:
             pass
@@ -115,69 +126,53 @@ class SAKy040(SA):
     # counter clockwise turn
     def _dataFallingCallback(self, pin):
 
+
         if GPIO.input(self.clockPin) == 1:
 
-            logging.debug( "Received 1->0 on KY040 data PIN #{0} while 1 on clock PIN #{1} (counter clockwise turn) --- FILE: {2}".format(
-                self.dataPin,
-                self.clockPin,
-                __file__)
-            )
+            with self.lock:
 
-            current_time = time()
-            diff = current_time - self.last_change_time
+                logging.debug( "Received 1->0 on KY040 'DATA' PIN #{0} while 1 on 'CLOCK' PIN #{1} (counter clockwise turn) --- FILE: {2}".format(
+                    self.dataPin,
+                    self.clockPin,
+                    __file__)
+                )
 
-            change = self.STANDBY
+                current_time = time()
+                diff = current_time - self.last_change_time
 
-            # if more than 1 sec elapsed since the last change
-            if(diff >= self.__class__.MIN_DIFF_TIME):
+                change = self.STANDBY
 
-                # then anything this operation is allowed with normal speed
-                change = self.__class__.DECREASE_SLOW
+                # if more than 1 sec elapsed since the last change
+                if(diff >= self.__class__.MIN_DIFF_TIME):
 
-            # if less than 1 sec elapsed since the last change 
-            # and the previous direction was counter clockwise
-            elif self.last_change < 0 :
+                    # then anything this operation is allowed with normal speed
+                    change = self.__class__.DECREASE_SLOW
 
-                # then only 
-                change = self.__class__.DECREASE_FAST
+                # if less than 1 sec elapsed since the last change 
+                # and the previous direction was counter clockwise
+                elif self.last_change < 0 :
 
-            if not change == self.STANDBY:
-                self.last_change = change
-                self.last_change_time = time()
-                self.rotaryCallback(change)
+                    # then only 
+                    change = self.__class__.DECREASE_FAST
+
+                if self.rotaryCallback and not change == self.STANDBY:
+                    self.last_change = change
+                    self.last_change_time = time()
+                    self.rotaryCallback(change)
 
         else:
             pass
 
     def _switchCallback(self, pin):
+
         if GPIO.input(self.switchPin) == 0:
 
-            logging.debug( "Received 0 on KY040 switch PIN #{0} --- FILE: {1}".format(
-                self.switchPin,
-                __file__)
-            )
+            with self.lock:
 
-            self.switchCallback()
+                logging.debug( "Received 0 on KY040 switch PIN #{0} --- FILE: {1}".format(
+                    self.switchPin,
+                    __file__)
+                )
 
-#test
-if __name__ == "__main__":
+                self.switchCallback()
 
-    CLOCK_PIN = 17
-    DATA_PIN = 27
-    SWITCH_PIN = 23
-
-    def rotaryChange(value):
-        print( "turned - ", str(value))
-
-    def switchPressed():
-        print ("button pressed")
-
-    ky040 = SAKy040("1", CLOCK_PIN, DATA_PIN, SWITCH_PIN, rotaryChange, switchPressed)
-    ky040.configure()
-
-    print(ky040.getSe)
-    try:
-        while True:
-            sleep(10)
-    finally:
-        ky040.unconfigure()

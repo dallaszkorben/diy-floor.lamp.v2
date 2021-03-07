@@ -1,9 +1,13 @@
 #! /usr/bin/python3
 
-from senact.sa_pwm import SAPwm
 from time import sleep
+import logging
+from senact.sa_pwm import SAPwm
 
+#test
 if __name__ == "__main__":
+
+    ID = 1
 
     PWM_PIN = 18
     PWM_FREQ = 800
@@ -11,7 +15,7 @@ if __name__ == "__main__":
     DIR_UP = 1
     DIR_DOWN = -1
 
-    saPwm = SAPwm("1", PWM_PIN, PWM_FREQ)
+    saPwm = SAPwm(ID, PWM_PIN, PWM_FREQ)
     saPwm.configure()
 
     def triggerValue(value):
@@ -30,7 +34,10 @@ if __name__ == "__main__":
                 direction = DIR_DOWN
             elif value <= 0:
                 direction = DIR_UP
-            sleep(0.02)
+            sleep(0.1)
 
     finally:
         saPwm.unconfigure()
+
+
+

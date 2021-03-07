@@ -7,118 +7,151 @@ from egadget.eg import EG
 
 class EGLight(EG):
 
-    POTMETER_MIN = 0
-    POTMETER_MAX = 100
+    def __init__(self, gadgetName, actuatorPwm, sensorKy040, fetchSavedLightValue=None, saveLightValue=None, rotaryCallbackMethod=None, switchCallbackMethod=None):
 
-    def __init__(self, gadgetName, actuatorId, pinPwm, freqPwm, sensorId, pinClock, pinData, pinSwitch, fetchLightValue, saveLightValue):
+        self.minLightValue = 30
+        self.maxLightValue = 80
 
         self.gadgetName = gadgetName
 
-        self.actuatorId = actuatorId
-        self.pinPwm = pinPwm
-        self.freqPwm = freqPwm
+        self.actuatorPwm = actuatorPwm
+        self.sensorKy040 = sensorKy040
 
-        self.sensorId = sensorId
-        self.pinClock = pinClock
-        self.pinData = pinData
-        self.pinSwitch = pinSwitch
+        if rotaryCallbackMethod:
+            self.sensorKy040.setRotaryCallbackMethod(rotaryCallbackMethod)
+        else:
+            self.sensorKy040.setRotaryCallbackMethod(self.rotaryCallbackMethod)
 
-        self.fetchLightValue = fetchLightValue
+        if switchCallbackMethod:
+            self.sensorKy040.setSwitchCallbackMethod(switchCallbackMethod)
+        else:
+            self.sensorKy040.setSwitchCallbackMethod(self.switchCallbackMethod)
+
+        self.fetchSavedLightValue = fetchSavedLightValue
         self.saveLightValue = saveLightValue
 
-        self.saPwm = SAPwm(actuatorId, pinPwm, freqPwm)
-        self.saKy040 = SAKy040(sensorId, pinClock, pinData, pinSwitch, self.rotaryChanged, self.switchPressed)
-
-        self.saPwm.configure()
-        self.saKy040.configure()
+        self.actuatorPwm.configure()
+        self.sensorKy040.configure()
 
         self.resetLight()
 
-    def getSensor(self, actuatorId):
-        if actuatorId == self.sensorId:
-            return self.saKy040
+    def getGadgetName(self):
+        return self.gadgetName
+
+    def getSensor(self, sensorId):
+        if sensorId == self.sensorKy040.id:
+            return self.sensorKy040
         else:
-            raise AttributeError("actuatorId={actuatorId} is not a valid ID")
+            raise AttributeError(f"sensorId={sensorId} is not a valid ID")
+
+    def getSensorKy040(self):
+        return self.sensorKy040
 
     def getActuator(self, actuatorId):
-        if actuatorId == self.actuatorId:
-            return self.saPwm
+        if actuatorId == self.actuatorPwm.id:
+            return self.actuatorPwm
         else:
-            raise AttributeError("actuatorId={actuatorId} is not a valid ID")
+            raise AttributeError(f"actuatorId={actuatorId} is not a valid ID")
+
+    def getActuatorPwm(self):
+        return self.actuatorPwm
 
     def getSensorIds(self):
-        return (self.sensorId, )
+        return (self.sensorKy040.id, )
 
     def getActuatorIds(self):
-        return (self.actuatorId, )
+        return (self.actuatorPwm.id, )
 
     def resetLight(self):
-        lightValue = self.fetchLightValue()
 
-        if lightValue['current']:
-            self.setLight(lightValue['current'], lightValue['current'])
+        if self.fetchSavedLightValue:
+            lightValue = self.fetchSavedLightValue()
         else:
-            self.setLight(lightValue['current'], 100)
+            self.lightValue = {'current': self.minLightValue, 'previous': self.maxLightValue}
+            lightValue = self.lightValue
 
-        logging.info("Reset:          " + str(lightValue['current']))
+        self.setLight(lightValue['current'], lightValue['previous'])
 
-    def rotaryChanged(self, value) -> dict:
+        logging.info("Reset:          current:{0}, previous:{1}".format(lightValue['current'], lightValue['previous']))
 
-        lightValue = self.fetchLightValue()
+    def setLight(self, newLightValue, oldLightValue=None) -> dict:
+        """
+        Saves the value and change the level of the light 
+        """
 
-        oldValue = lightValue['current']
-        newValue = oldValue + value
-
-        if newValue > EGLight.POTMETER_MAX:
-            newValue = EGLight.POTMETER_MAX
-        elif newValue < EGLight.POTMETER_MIN:
-            newValue = EGLight.POTMETER_MIN
-
-        return self.setLight(newValue, oldValue)
-
-    def switchPressed(self) -> dict:
-        lightValue = self.fetchLightValue()
-
-        if lightValue['current']:
-            newValue = EGLight.POTMETER_MIN
-            oldValue = lightValue['current']
-            turned = "off"
-#            self.setLight(newValue, lightValue['current'])
-
+        if self.saveLightValue:
+            self.saveLightValue(newLightValue, oldLightValue)
         else:
-            oldValue = lightValue['current']
-            newValue = lightValue['before-off']
-            turned = "on"
+            if oldLightValue:
+                self.lightValue['previous'] = oldLightValue
+            else:
+                self.lightValue['previous'] = self.lightValue['current']
 
-        return self.setLight(newValue, oldValue)
+            self.lightValue['current'] = newLightValue
 
-    # ================================================
+        pwmValue = self.actuatorPwm.setPwmByValue(newLightValue)
 
-    # save the value and change the level of the light
-    def setLight(self, lightValue, lightBeforeOff=100) -> dict:
-        self.saveLightValue(lightValue, lightBeforeOff)
-
-        logging.info( "Set Light {0} -> {1} --- FILE: {2}".format(
-            lightBeforeOff,
-            lightValue,
+        logging.info( "Set Light to {0} --- FILE: {1}".format(
+            newLightValue,
             __file__)
         )
 
-        pwmValue = self.saPwm.setPwmByValue(lightValue)
-
-        return {'result': 'OK', 'value': lightValue}
-
-    # ================================================
+        return {'result': 'OK', 'value': newLightValue}
 
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
 
-        logging.info( "Set Light {0} -...-> {1} in {2} seconds --- FILE: {3}".format(
+        pwmValue = self.actuatorPwm.setPwmByStepValueGradually(actuator, fromValue, toValue, inSeconds)
+
+        logging.info( "Set Light {0} -> {1} in {2} seconds --- FILE: {3}".format(
             fromValue,
             toValue,
             inSeconds,
             __file__)
         )
 
-        pwmValue = self.saPwm.setPwmByStepValueGradually(actuator, fromValue, toValue, inSeconds)
-        self.saveLightValue(toValue)
+        if self.saveLightValue:
+            self.saveLightValue(toValue, fromValue)
+        else:
+            self.lightValue['previous'] = fromValue
+            self.lightValue['current'] = toValue
 
+        return {'result': 'OK', 'value': toValue}
+
+
+
+    # ==============================================
+
+    def rotaryCallbackMethod(self, value) -> dict:
+
+        if self.fetchSavedLightValue:
+            lightValue = self.fetchSavedLightValue()
+        else:
+            lightValue = self.lightValue
+
+        newValue = lightValue['current'] + value
+
+        if newValue > self.maxLightValue:
+            newValue = self.maxLightValue
+        elif newValue < self.minLightValue:
+            newValue = self.minLightValue
+
+        return self.setLight(newValue)
+
+    def switchCallbackMethod(self) -> dict:
+
+        if self.fetchSavedLightValue:
+            lightValue = self.fetchSavedLightValue()
+        else:
+            lightValue = self.lightValue
+
+        if lightValue['current']:
+            newValue = self.minLightValue
+            turned = "off"
+
+        else:
+            newValue = lightValue['previous']
+            turned = "on"
+
+        return self.setLight(newValue)
+
+    # ================================================

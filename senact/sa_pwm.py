@@ -61,7 +61,7 @@ class SAPwm(SA):
             # Change the Duty Cycle
             self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
-            logging.debug( "Set PWM Duty Cycle to {0} (<-{1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
+            logging.debug( "Set PWM Duty Cycle to {0} (input: {1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
                 fadeValue,
                 value,
                 self.pwmFreq,
@@ -77,7 +77,7 @@ class SAPwm(SA):
         diff = toValue - fromValue
 
         if diff == 0:
-            logging.debug("PWM Duty Cycle did not change as the value {0} (<-{1})was already set --- FILE: {2}".format(
+            logging.debug("PWM Duty Cycle did not change as the value {0} (input: {1}) was already set --- FILE: {2}".format(
                 Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
                 toValue,
                 __file__)
@@ -98,7 +98,7 @@ class SAPwm(SA):
                 par2 = toValue - 1
                 par3 = -1
 
-            logging.debug("Set PWM Duty Cycle gradually from {0} (<-{1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
+            logging.debug("Set PWM Duty Cycle gradually from {0} (input: {1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
                 Converter.getLinearValueToExponential(fromValue, self.maxValue, self.maxDutyCycle),
                 fromValue,
                 Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
@@ -114,7 +114,7 @@ class SAPwm(SA):
                 fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
                 self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
-                logging.debug( "    Set to {0} (<-{1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
+                logging.debug( "    Set to {0} (input: {1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
                     fadeValue,
                     value,
                     self.pwmFreq,
