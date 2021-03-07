@@ -23,7 +23,7 @@ from wgadget.endpoints.ep_immediately_set_light import EPImmediatelySetLight
 from wgadget.endpoints.ep_immediately_increase_light import EPImmediatelyIncreaseLight
 from wgadget.endpoints.ep_immediately_reverse_light import EPImmediatelyReverseLight
 
-from wgadget.crossdomain import crossdomain
+#from wgadget.crossdomain import crossdomain
 
 # -----------------------------------
 #

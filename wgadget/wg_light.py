@@ -3,6 +3,8 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
+from threading import Lock
+
 from datetime import datetime
 import tzlocal
 import time
@@ -16,6 +18,7 @@ from flask_cors import CORS
 
 from wgadget.immediately import ImmediatelyView
 from wgadget.gradually import GraduallyView
+from wgadget.info import InfoView
 
 from threading import Thread
 
@@ -31,6 +34,9 @@ class WGLight(object):
 
 #    def __init__(self, gadgetName, actuatorLightId, pinPwm, freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch):
     def __init__(self):
+
+        self.lock = Lock()
+
         cg = getConfigEGadget()
 
         self.gadgetName = cg["gadget-name"]
@@ -61,12 +67,15 @@ class WGLight(object):
 
         self.app = Flask(__name__)
 
+        self.lock = Lock()
+
         # This will enable CORS for all routes
         CORS(self.app)
 
         # register the end-points
         ImmediatelyView.register(self.app, init_argument=self)
         GraduallyView.register(self.app, init_argument=self)
+        InfoView.register(self.app, init_argument=self)
 
     def getLightId(self):
         return self.actuator1Id
@@ -114,14 +123,18 @@ class WGLight(object):
             'before-off': int(config_ini["light-before-off-value"])
         }
 
+    # =====================================================
+
     def saveLightValue(self, value, beforeOffValue=100):
 
-        config_ini = getConfigExchange()
-        config_ini["light-current-value"] = value
-        if value:
-            config_ini["light-before-off-value"] = value
-        else:
-            config_ini["light-before-off-value"] = beforeOffValue
+        with self.lock:
+            config_ini = getConfigExchange()
+            config_ini["light-current-value"] = value
+            if value:
+                config_ini["light-before-off-value"] = value
+            else:
+                config_ini["light-before-off-value"] = beforeOffValue
 
-        setConfigExchange(config_ini)
+            setConfigExchange(config_ini)
 
+    # ====================================================

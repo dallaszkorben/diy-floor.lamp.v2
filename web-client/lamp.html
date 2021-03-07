@@ -1,3 +1,4 @@
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <html>
 <head>
 <style>
@@ -28,15 +29,40 @@
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
 <script src="node_modules/jquery/dist/jquery.min.js"></script>
 <script>
+
+    function refreshValues(){
+        $.ajax({type: "GET", url: "http://192.168.1.88:5000/info/actuatorId/1", async: false,
+            success: function(result){
+                jsonResult=JSON.parse(result);
+                $("#value").html(jsonResult.current);
+                $("#slider").val(jsonResult.current);
+            },
+            error: function(xhr,status,error){
+                $("#value").html(xhr.statusText + " " + xhr.responseText);
+            }
+        });
+    }
+
+
     $(document).ready(function(){
 
-//        $('#sliderValue').show()
+        //-----------------------
+        // Initialize Slider
+        //-----------------------
+        refreshValues();
+        setInterval(refreshValues, 5000);
 
+
+
+        //-----------------------
+        // Control UP button click
+        //-----------------------
         $("#buttonUp10").click(function(){
             $.ajax({type: "POST", url: "http://192.168.1.88:5000/immediately/increase", data: {actuatorId:1, stepValue:10}, async: true, 
                 success: function(result){
                     jsonResult=JSON.parse(result);
                     $("#value").html(jsonResult.value);
+                    $("#slider").val(jsonResult.value);
                 },
                 error: function(xhr,status,error){
                     $("#value").html(xhr.statusText + " " + xhr.responseText);
@@ -44,11 +70,15 @@
             });
         });
 
+        //-----------------------
+        // Control DOWN button click
+        //-----------------------
         $("#buttonDown10").click(function(){
             $.ajax({type: "POST", url: "http://192.168.1.88:5000/immediately/increase", data: {actuatorId:1, stepValue:-10}, async: true, 
                 success: function(result){
                     jsonResult=JSON.parse(result);
                     $("#value").html(jsonResult.value);
+                    $("#slider").val(jsonResult.value);
                 },
                 error: function(xhr,status,error){
                     $("#value").html(xhr.statusText + " " + xhr.responseText);
@@ -56,11 +86,18 @@
             });
         });
 
+        //-----------------------
+        // Control TURN button click
+        //-----------------------
         $("#buttonReverse").click(function(){
             $.ajax({type: "POST", url: "http://192.168.1.88:5000/immediately/reverse", data: {actuatorId:1}, async: true, 
                 success: function(result){
                     jsonResult=JSON.parse(result);
                     $("#value").html(jsonResult.value);
+
+                    $("#slider").val(jsonResult.value);
+                    //$("#slider").slider("refresh");
+                    //$("#slider").slider("value", jsonResult.value);
                 },
                 error: function(xhr,status,error){
                     $("#value").html(xhr.statusText + " " + xhr.responseText);
@@ -85,6 +122,10 @@
 //mouseup
 //mousedown
 //mousemove
+
+        //-----------------------
+        // Control SLIDER release button click
+        //-----------------------
         $("#slider").mouseup(function(){
             sliderValue = parseInt($(this).val())
 
@@ -113,21 +154,22 @@
         <td rowspan="2"><button id="buttonReverse">&#10227;</button></td>
         <td rowspan="2">
             <div id="slider-wrapper">
-<input id="slider" class="arot-90" type="range" list="tickmarks" min="0" max="100" value="0">
-                <datalist id="tickmarks">
-                  <option value="0" label="0%">a</option>
-                  <option value="10"></option>
-                  <option value="20"></option>
-                  <option value="30"></option>
-                  <option value="40"></option>
-                  <option value="50" label="50%"></option>
-                  <option value="60"></option>
-                  <option value="70"></option>
-                  <option value="80"></option>
-                  <option value="90"></option>
-                  <option value="100" label="100%"></option>
-                </datalist>
-</div>
+                <input id="slider" class="arot-90" type="range" list="tickmarks" min="0" max="100" value="0">
+                    <datalist id="tickmarks">
+                      <option value="0" label="0%">a</option>
+                      <option value="10"></option>
+                      <option value="20"></option>
+                      <option value="30"></option>
+                      <option value="40"></option>
+                      <option value="50" label="50%"></option>
+                      <option value="60"></option>
+                      <option value="70"></option>
+                      <option value="80"></option>
+                      <option value="90"></option>
+                      <option value="100" label="100%"></option>
+                    </datalist>
+                </input>
+            </div>
         </td>
         <td></td>
     </tr>

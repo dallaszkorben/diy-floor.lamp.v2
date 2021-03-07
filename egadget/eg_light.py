@@ -92,6 +92,8 @@ class EGLight(EG):
 
         return self.setLight(newValue, oldValue)
 
+    # ================================================
+
     # save the value and change the level of the light
     def setLight(self, lightValue, lightBeforeOff=100) -> dict:
         self.saveLightValue(lightValue, lightBeforeOff)
@@ -106,6 +108,8 @@ class EGLight(EG):
 
         return {'result': 'OK', 'value': lightValue}
 
+    # ================================================
+
     def setLightGradually(self, actuator, fromValue, toValue, inSeconds):
 
         logging.info( "Set Light {0} -...-> {1} in {2} seconds --- FILE: {3}".format(
@@ -117,6 +121,4 @@ class EGLight(EG):
 
         pwmValue = self.saPwm.setPwmByStepValueGradually(actuator, fromValue, toValue, inSeconds)
         self.saveLightValue(toValue)
-
-
 

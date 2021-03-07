@@ -5,6 +5,8 @@ import RPi.GPIO as GPIO
 import pigpio
 from time import sleep
 
+from threading import Lock
+
 #if __name__ == "__main__":
 from senact.sa import SA
 import os
@@ -40,6 +42,8 @@ class SAPwm(SA):
         self.pi_pwm = pigpio.pi()
         self.pi_pwm.set_mode(self.pwmPin, pigpio.OUTPUT)
 
+        self.lock = Lock()
+
     def getSenactType(self):
         return self.__class__.SENACT_TYPE
 
@@ -48,19 +52,23 @@ class SAPwm(SA):
 
     def setPwmByValue(self, value):
 
-        # calculate the pwm by value
-        fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
+        # sychronizing the method
+        with self.lock:
 
-        # Change the Duty Cycle
-        self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
+            # calculate the pwm by value
+            fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
 
-        logging.debug( "Set PWM Duty Cycle to {0} (<-{1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
-            fadeValue,
-            value,
-            self.pwmFreq,
-            self.pwmPin,
-            __file__)
-        )
+            # Change the Duty Cycle
+            self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
+
+            logging.debug( "Set PWM Duty Cycle to {0} (<-{1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
+                fadeValue,
+                value,
+                self.pwmFreq,
+                self.pwmPin,
+                __file__)
+            )
+
 
         return fadeValue
 
@@ -76,43 +84,45 @@ class SAPwm(SA):
             )
             return
 
-        secInOneStep = abs(inSeconds / diff)
+        with self.lock:
 
-        if diff >= 0:
-            par1 = fromValue
-            par2 = toValue + 1
-            par3 = 1
+            secInOneStep = abs(inSeconds / diff)
 
-        elif diff < 0:
-            par1 = fromValue
-            par2 = toValue - 1
-            par3 = -1
+            if diff >= 0:
+                par1 = fromValue
+                par2 = toValue + 1
+                par3 = 1
 
-        logging.debug("Set PWM Duty Cycle gradually from {0} (<-{1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
-            Converter.getLinearValueToExponential(fromValue, self.maxValue, self.maxDutyCycle),
-            fromValue,
-            Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
-            toValue,
-            inSeconds,
-            __file__)
-        )
+            elif diff < 0:
+                par1 = fromValue
+                par2 = toValue - 1
+                par3 = -1
 
-        for value in range(par1, par2, par3):
-            #print("waiting:", secInOneStep, "value: ", value)
-            sleep(secInOneStep)
-
-            fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
-            self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
-
-            logging.debug( "    Set to {0} (<-{1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
-                fadeValue,
-                value,
-                self.pwmFreq,
-                self.pwmPin,
+            logging.debug("Set PWM Duty Cycle gradually from {0} (<-{1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
+                Converter.getLinearValueToExponential(fromValue, self.maxValue, self.maxDutyCycle),
+                fromValue,
+                Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
+                toValue,
+                inSeconds,
                 __file__)
             )
 
-        logging.debug("Set PWM Duty Cycle gradually is done")
+            for value in range(par1, par2, par3):
+                #print("waiting:", secInOneStep, "value: ", value)
+                sleep(secInOneStep)
+
+                fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
+
+                logging.debug( "    Set to {0} (<-{1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
+                    fadeValue,
+                    value,
+                    self.pwmFreq,
+                    self.pwmPin,
+                    __file__)
+                )
+
+            logging.debug("Set PWM Duty Cycle gradually is done")
 
         return
 

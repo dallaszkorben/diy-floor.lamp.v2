@@ -2,6 +2,9 @@ import os
 import configparser
 from pathlib import Path
 import logging
+
+from threading import Lock
+
 #from builtins import UnicodeDecodeError
 
 from config.property import Property
@@ -51,20 +54,23 @@ class ConfigExchange( Property ):
 # ---
 # ---
 
+lock = Lock()
 def getConfigExchange():
-    ce = ConfigExchange.getInstance()
-    config = {}
+    with lock:
+        ce = ConfigExchange.getInstance()
+        config = {}
 
-    config['light-current-value'] = ce.getLightCurrentValue()
-    config['light-before-off-value'] = ce.getLightBeforeOffValue()
+        config['light-current-value'] = ce.getLightCurrentValue()
+        config['light-before-off-value'] = ce.getLightBeforeOffValue()
 
-    return config
+        return config
 
 def setConfigExchange(config):
-    ce = ConfigExchange.getInstance()
+    with lock:
+        ce = ConfigExchange.getInstance()
 
-    if "light-current-value" in config:
-        ce.setLightCurrentValue(config["light-current-value"])
+        if "light-current-value" in config:
+            ce.setLightCurrentValue(config["light-current-value"])
 
-    if "light-before-off-value" in config:
-        ce.setLightBeforeOffValue(config["light-before-off-value"])
+        if "light-before-off-value" in config:
+            ce.setLightBeforeOffValue(config["light-before-off-value"])
