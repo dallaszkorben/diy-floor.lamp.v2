@@ -29,26 +29,8 @@ if __name__ == "__main__":
 
     def switchCallback():
 
-        lightValue = egLight.lightValue
-
-        print(lightValue)
-
-        if lightValue['current'] > egLight.minLightValue:
-            fromValue = lightValue['current']
-            toValue = egLight.minLightValue
-            turned = "off"
-
-        else:
-            fromValue = egLight.minLightValue
-
-            if lightValue['current'] == lightValue['previous']:
-                toValue = egLight.maxLightValue
-            else:
-                toValue = lightValue['previous']
-            turned = "on"
-
-        print("Switch started")
-        result = egLight.setLightGradually(ACTUATOR_ID, fromValue, toValue, 3)
+        print("Switch pushed")
+        result = egLight.reverseLight(4)
         print(result)
 
         return result
@@ -62,7 +44,7 @@ if __name__ == "__main__":
 
     # LOG 
     logPath = os.path.join(".", "test.log")
-    logLevel = "INFO" #"DEBUG"
+    logLevel = "DEBUG" #"INFO" #"DEBUG"
     logging.basicConfig(
         handlers=[RotatingFileHandler(logPath, maxBytes=5*1024*1024, backupCount=5)],
         format='%(asctime)s %(levelname)8s - %(message)s' , 

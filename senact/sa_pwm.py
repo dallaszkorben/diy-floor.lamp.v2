@@ -72,19 +72,20 @@ class SAPwm(SA):
 
         return fadeValue
 
-    def setPwmByStepValueGradually(self, actuator, fromValue, toValue, inSeconds):
-
-        diff = toValue - fromValue
-
-        if diff == 0:
-            logging.debug("PWM Duty Cycle did not change as the value {0} (input: {1}) was already set --- FILE: {2}".format(
-                Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
-                toValue,
-                __file__)
-            )
-            return
+    def setPwmByStepValueGradually(self, toValue, fromValue, inSeconds):
 
         with self.lock:
+
+            diff = toValue - fromValue
+
+            if diff == 0:
+                logging.debug("PWM Duty Cycle did not change as the value {0} (input: {1}) was already set --- FILE: {2}".format(
+                    Converter.getLinearValueToExponential(toValue, self.maxValue, self.maxDutyCycle),
+                    toValue,
+                    __file__)
+                )
+                return
+
 
             secInOneStep = abs(inSeconds / diff)
 
@@ -131,41 +132,5 @@ class SAPwm(SA):
 
     def unconfigure(self):
         pass
-
-
-#test
-if __name__ == "__main__":
-
-    PWM_PIN = 18
-    PWM_FREQ = 800
-
-    DIR_UP = 1
-    DIR_DOWN = -1
-
-    saPwm = SAPwm(PWM_PIN, PWM_FREQ)
-    saPwm.configure()
-
-    def triggerValue(value):
-        print(value)
-        saPwm.setPwmByValue(1, value)
-
-    try:
-
-        value = 0
-        direction = DIR_UP
-        while True:
-
-            triggerValue(value)
-            value += direction
-            if value >= 100:
-                direction = DIR_DOWN
-            elif value <= 0:
-                direction = DIR_UP
-            sleep(0.2)
-
-    finally:
-        saPwm.unconfigure()
-#        GPIO.cleanup()
-
 
 

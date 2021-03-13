@@ -27,7 +27,7 @@ class SAKy040(SA):
 
     SENACT_TYPE = SenAct.SENSOR
 
-    def __init__(self, id, clockPin, dataPin, switchPin, rotaryCallback=None, switchCallback=None):
+    def __init__(self, id, clockPin, dataPin, switchPin, rotaryCallbackMethod=None, switchCallbackMethod=None):
 
         self.lock = Lock()
 
@@ -37,8 +37,8 @@ class SAKy040(SA):
         self.clockPin = clockPin
         self.dataPin = dataPin
         self.switchPin = switchPin
-        self.rotaryCallback = rotaryCallback
-        self.switchCallback = switchCallback
+        self.rotaryCallbackMethod = rotaryCallbackMethod
+        self.switchCallbackMethod = switchCallbackMethod
 
         #setup pins
         GPIO.setup(self.clockPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -54,11 +54,11 @@ class SAKy040(SA):
     def getSenactId(self):
         return self.id
 
-    def setRotaryCallbackMethod(self, rotaryCallback):
-        self.rotaryCallback = rotaryCallback
+    def setRotaryCallbackMethod(self, rotaryCallbackMethod):
+        self.rotaryCallbackMethod = rotaryCallbackMethod
 
-    def setSwitchCallbackMethod(self, switchCallback):
-        self.switchCallback = switchCallback
+    def setSwitchCallbackMethod(self, switchCallbackMethod):
+        self.switchCallbackMethod = switchCallbackMethod
 
     def configure(self):
 
@@ -91,12 +91,6 @@ class SAKy040(SA):
 
             with self.lock:
 
-                logging.debug( "Received 1->0 on KY040 'CLOCK' PIN #{0} while 1 on 'DATA' PIN #{1} (clockwise turn)--- FILE: {2}".format(
-                    self.clockPin,
-                    self.dataPin,
-                    __file__)
-                )
-
                 current_time = time()
                 diff = current_time - self.last_change_time
 
@@ -115,10 +109,18 @@ class SAKy040(SA):
                     # then only 
                     change = self.__class__.INCREASE_FAST
 
-                if self.rotaryCallback and not change == self.STANDBY:
+                if self.rotaryCallbackMethod and not change == self.STANDBY:
+
+                    logging.debug( "Received 1->0 on KY040 'CLOCK' PIN #{0} while 1 on 'DATA' PIN #{1} (clockwise turn) Change: {3} --- FILE: {2}".format(
+                        self.clockPin,
+                        self.dataPin,
+                        __file__,
+                        change)
+                    )
+
                     self.last_change = change
                     self.last_change_time = time()
-                    self.rotaryCallback(change)
+                    self.rotaryCallbackMethod(change)
 
         else:
             pass
@@ -131,11 +133,6 @@ class SAKy040(SA):
 
             with self.lock:
 
-                logging.debug( "Received 1->0 on KY040 'DATA' PIN #{0} while 1 on 'CLOCK' PIN #{1} (counter clockwise turn) --- FILE: {2}".format(
-                    self.dataPin,
-                    self.clockPin,
-                    __file__)
-                )
 
                 current_time = time()
                 diff = current_time - self.last_change_time
@@ -155,10 +152,18 @@ class SAKy040(SA):
                     # then only 
                     change = self.__class__.DECREASE_FAST
 
-                if self.rotaryCallback and not change == self.STANDBY:
+                if self.rotaryCallbackMethod and not change == self.STANDBY:
+
+                    logging.debug( "Received 1->0 on KY040 'DATA' PIN #{0} while 1 on 'CLOCK' PIN #{1} (counter clockwise turn) Change: {3} --- FILE: {2}".format(
+                        self.dataPin,
+                        self.clockPin,
+                        __file__,
+                        change)
+                    )
+
                     self.last_change = change
                     self.last_change_time = time()
-                    self.rotaryCallback(change)
+                    self.rotaryCallbackMethod(change)
 
         else:
             pass
@@ -174,5 +179,6 @@ class SAKy040(SA):
                     __file__)
                 )
 
-                self.switchCallback()
+                if self.switchCallbackMethod:
 
+                    self.switchCallbackMethod()

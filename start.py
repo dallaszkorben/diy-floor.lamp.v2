@@ -7,7 +7,7 @@ if __name__ == "__main__":
     wgLight = WGLight()
 
     try:
-        wgLight.run(host= '0.0.0.0')
+        wgLight.run(host= '0.0.0.0', debug=False)
 #        wgLight.run()
 
     finally:
