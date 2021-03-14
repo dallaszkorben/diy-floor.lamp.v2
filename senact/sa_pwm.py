@@ -72,7 +72,7 @@ class SAPwm(SA):
 
         return fadeValue
 
-    def setPwmByStepValueGradually(self, toValue, fromValue, inSeconds):
+    def setPwmByStepValueGradually(self, toValue, fromValue, inSeconds, saveLightValueMethod=None):
 
         with self.lock:
 
@@ -113,7 +113,6 @@ class SAPwm(SA):
                 sleep(secInOneStep)
 
                 fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
-                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
                 logging.debug( "    Set to {0} (input: {1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
                     fadeValue,
@@ -122,6 +121,11 @@ class SAPwm(SA):
                     self.pwmPin,
                     __file__)
                 )
+
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
+
+                if saveLightValueMethod:
+                    saveLightValueMethod(value, fromValue)
 
             logging.debug("Set PWM Duty Cycle gradually is done")
 

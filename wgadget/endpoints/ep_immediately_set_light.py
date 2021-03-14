@@ -56,7 +56,7 @@ class EPImmediatelySetLight(EP):
 
             if value >= 0 and value <= 100:
 
-                actualValue = self.web_gadget.fetchLightValue()
+                actualValue = self.web_gadget.fetchSavedLightValue()
 
                 logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
                     EPImmediatelySetLight.METHOD, EPImmediatelySetLight.URL,

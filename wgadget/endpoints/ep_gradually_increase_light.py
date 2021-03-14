@@ -62,7 +62,7 @@ class EPGraduallyIncreaseLight(EP):
 
         if actuatorId == self.web_gadget.getLightId():
 
-            actualValue = self.web_gadget.fetchLightValue()
+            actualValue = self.web_gadget.fetchSavedLightValue()
             newValue = actualValue['current'] + stepValue
             newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
 

@@ -69,7 +69,7 @@ class WGLight(object):
         saPwm = SAPwm(self.actuator1Id, self.actuator1PwmPin, self.actuator1PwmFreq)
         saKy040 = SAKy040(self.sensor1Id, self.sensor1ClockPin, self.sensor1DataPin, self.sensor1SwitchPin)
 
-        self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValue=self.fetchLightValue, saveLightValue=self.saveLightValue, switchCallbackMethod=None, rotaryCallbackMethod=None )
+        self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValueMethod=self.fetchSavedLightValue, saveLightValueMethod=self.saveLightValue, switchCallbackMethod=None, rotaryCallbackMethod=None )
 
         self.app = Flask(__name__)
         self.app.logger.setLevel(logging.ERROR)
@@ -119,12 +119,12 @@ class WGLight(object):
             if nowDateTime >= atDateTime:
                 break
 
-        fromValue = self.fetchLightValue()
+        fromValue = self.fetchSavedLightValue()
         self.egLight.setLight(toValue, fromValue['current'], inSeconds)
 
     # =====================================================
 
-    def fetchLightValue(self):
+    def fetchSavedLightValue(self):
         config_ini = getConfigExchange()
 
         return {

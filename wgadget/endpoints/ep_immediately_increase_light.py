@@ -51,7 +51,7 @@ class EPImmediatelyIncreaseLight(EP):
         actuatorId = int(payload[EPImmediatelyIncreaseLight.ATTR_ACTUATOR_ID])
         stepValue = int(payload[EPImmediatelyIncreaseLight.ATTR_STEP_VALUE])
 
-        actualValue = self.web_gadget.fetchLightValue()
+        actualValue = self.web_gadget.fetchSavedLightValue()
         newValue = actualValue['current'] + stepValue
         newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
 

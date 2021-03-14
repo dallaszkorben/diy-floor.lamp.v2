@@ -44,7 +44,7 @@ class EPInfoLight(EP):
 
         if actuatorId == self.web_gadget.getLightId():
 
-            actualValue = self.web_gadget.fetchLightValue()
+            actualValue = self.web_gadget.fetchSavedLightValue()
 
             logging.debug( "WEB request: {0} {1} ('{2}': {3})".format(
                 EPInfoLight.METHOD, EPInfoLight.URL,
