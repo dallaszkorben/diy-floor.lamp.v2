@@ -71,7 +71,7 @@ class EPGraduallyScheduleSetLight(EP):
 
             if value >= 0 and value <= 100:
 
-                logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7}, '{8}': {9})".format(
+                logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7}, '{8}': {9})".format(
                     EPGraduallyScheduleSetLight.METHOD, EPGraduallyScheduleSetLight.URL,
                     EPGraduallyScheduleSetLight.ATTR_ACTUATOR_ID, actuatorId,
                     EPGraduallyScheduleSetLight.ATTR_VALUE, value,

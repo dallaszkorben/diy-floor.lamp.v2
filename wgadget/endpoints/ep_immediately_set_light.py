@@ -58,7 +58,7 @@ class EPImmediatelySetLight(EP):
 
                 actualValue = self.web_gadget.fetchLightValue()
 
-                logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
+                logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
                     EPImmediatelySetLight.METHOD, EPImmediatelySetLight.URL,
                     EPImmediatelySetLight.ATTR_ACTUATOR_ID, actuatorId,
                     EPImmediatelySetLight.ATTR_VALUE, value)

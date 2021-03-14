@@ -129,8 +129,6 @@ class EGLight(EG):
         else:
             lightValue = self.lightValue
 
-        print(lightValue)
-
         if lightValue['current'] > self.minLightValue:
             fromValue = lightValue['current']
             toValue = self.minLightValue

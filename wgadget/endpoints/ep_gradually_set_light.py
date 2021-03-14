@@ -65,7 +65,7 @@ class EPGraduallySetLight(EP):
                 actualValue = self.web_gadget.fetchLightValue()
                 newValue = value
 
-                logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})".format(
+                logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})".format(
                     EPGraduallySetLight.METHOD, EPGraduallySetLight.URL,
                     EPGraduallySetLight.ATTR_ACTUATOR_ID, actuatorId,
                     EPGraduallySetLight.ATTR_VALUE, value,
@@ -73,7 +73,7 @@ class EPGraduallySetLight(EP):
                 )
 
                 # Save the light value and set the Light
-                thread = Thread(target = self.web_gadget.setLightGradually, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
+                thread = Thread(target = self.web_gadget.setLight, args = (newValue, actualValue['current'], inSeconds)) 
                 thread.daemon = True
                 thread.start()
 

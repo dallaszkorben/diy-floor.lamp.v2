@@ -72,6 +72,7 @@ class WGLight(object):
         self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValue=self.fetchLightValue, saveLightValue=self.saveLightValue, switchCallbackMethod=None, rotaryCallbackMethod=None )
 
         self.app = Flask(__name__)
+        self.app.logger.setLevel(logging.ERROR)
 
         # This will enable CORS for all routes
         CORS(self.app)
@@ -94,14 +95,16 @@ class WGLight(object):
         self.app.run(host=host, debug=debug)
 #        self.app.run()
 
-    def setLight(self, value, beforeOffValue=100) -> dict:
-        return self.egLight.setLight(value, beforeOffValue)
+#    def setLight(self, value, beforeOffValue=100) -> dict:
+#        return self.egLight.setLight(value, beforeOffValue)
 
     def reverseLight(self):
         return self.egLight.reverseLight()
 
-    def setLightGradually(self, toValue, fromValue, inSeconds):
-        self.egLight.setLight(toValue, fromValue, inSeconds)
+#    def setLightGradually(self, toValue, fromValue, inSeconds):
+    def setLight(self, toValue, fromValue=100, inSeconds=0):
+
+        return self.egLight.setLight(toValue, fromValue, inSeconds)
 
     def setLightScheduledGradually(self, toValue, inSeconds, atDateTime):
 

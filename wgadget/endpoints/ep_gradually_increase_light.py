@@ -66,7 +66,7 @@ class EPGraduallyIncreaseLight(EP):
             newValue = actualValue['current'] + stepValue
             newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
 
-            logging.info( "{0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})  fromValue: {8}, toValue: {9}".format(
+            logging.debug( "{0} {1} ('{2}': {3}, '{4}': {5}, '{6}': {7})  fromValue: {8}, toValue: {9}".format(
                         EPGraduallyIncreaseLight.METHOD, EPGraduallyIncreaseLight.URL,
                         EPGraduallyIncreaseLight.ATTR_ACTUATOR_ID, actuatorId,
                         EPGraduallyIncreaseLight.ATTR_STEP_VALUE, stepValue,
@@ -74,7 +74,7 @@ class EPGraduallyIncreaseLight(EP):
                         actualValue['current'], newValue)
             )
 
-            thread = Thread(target = self.web_gadget.setLightGradually, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
+            thread = Thread(target = self.web_gadget.setLight, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
             thread.daemon = True
             thread.start()
 

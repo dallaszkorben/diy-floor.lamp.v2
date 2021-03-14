@@ -45,7 +45,7 @@ class EPImmediatelyReverseLight(EP):
 
         if actuatorId == self.web_gadget.getLightId():
 
-            logging.info( "WEB request: {0} {1} ('{2}': {3})".format(
+            logging.debug( "WEB request: {0} {1} ('{2}': {3})".format(
                 EPImmediatelyReverseLight.METHOD, EPImmediatelyReverseLight.URL,
                 EPImmediatelyReverseLight.ATTR_ACTUATOR_ID, actuatorId)
             )

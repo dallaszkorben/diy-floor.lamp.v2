@@ -109,7 +109,7 @@ class SAPwm(SA):
             )
 
             for value in range(par1, par2, par3):
-                #print("waiting:", secInOneStep, "value: ", value)
+
                 sleep(secInOneStep)
 
                 fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)

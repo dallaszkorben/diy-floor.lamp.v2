@@ -57,7 +57,7 @@ class EPImmediatelyIncreaseLight(EP):
 
         if actuatorId == self.web_gadget.getLightId():
 
-            logging.info( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
+            logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
                 EPImmediatelyIncreaseLight.METHOD, EPImmediatelyIncreaseLight.URL,
                 EPImmediatelyIncreaseLight.ATTR_ACTUATOR_ID, actuatorId,
                 EPImmediatelyIncreaseLight.ATTR_STEP_VALUE, stepValue)
