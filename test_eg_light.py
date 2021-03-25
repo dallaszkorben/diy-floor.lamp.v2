@@ -54,7 +54,7 @@ if __name__ == "__main__":
     saPwm = SAPwm(ACTUATOR_ID, PWM_PIN, PWM_FREQ)
     saKy040 = SAKy040(SENSOR_ID, CLOCK_PIN, DATA_PIN, SWITCH_PIN)
 
-    egLight = EGLight( "Light", saPwm, saKy040, fetchSavedLightValue=None, saveLightValue=None, switchCallbackMethod=switchCallback, rotaryCallbackMethod=rotaryCallback )
+    egLight = EGLight( "Light", saPwm, saKy040, fetchSavedLightValueMethod=None, saveLightValueMethod=None, switchCallbackMethod=switchCallback, rotaryCallbackMethod=rotaryCallback )
 
     print(egLight.getGadgetName(), 'has started')
 

@@ -82,6 +82,8 @@ class WGLight(object):
         GraduallyView.register(self.app, init_argument=self)
         InfoView.register(self.app, init_argument=self)
 
+        self.process = {"inProgress": False, "processId": None}
+
     def getLightId(self):
         return self.actuator1Id
 
@@ -130,6 +132,7 @@ class WGLight(object):
         return {
             'current': int(config_ini["light-current-value"]),
             'previous': int(config_ini["light-before-off-value"])
+
         }
 
     # =====================================================

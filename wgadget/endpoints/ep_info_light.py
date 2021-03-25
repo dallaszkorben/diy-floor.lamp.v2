@@ -51,7 +51,7 @@ class EPInfoLight(EP):
                 EPInfoLight.ATTR_ACTUATOR_ID, actuatorId)
             )
 
-            return actualValue
+            return {"value": actualValue, "process": self.web_gadget.process}
 
         else:
             raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(actuatorId, value), error_code=404)
