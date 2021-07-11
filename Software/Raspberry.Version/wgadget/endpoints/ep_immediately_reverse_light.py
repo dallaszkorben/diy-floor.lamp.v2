@@ -45,6 +45,11 @@ class EPImmediatelyReverseLight(EP):
 
         if actuatorId == self.web_gadget.getLightId():
 
+            # Stop the running Thread
+            self.web_gadget.gradualThreadController.indicateToStop()
+            while self.web_gadget.gradualThreadController.isRunning():
+                logging.debug( "  Waitiong for thread stops")
+
             logging.debug( "WEB request: {0} {1} ('{2}': {3})".format(
                 EPImmediatelyReverseLight.METHOD, EPImmediatelyReverseLight.URL,
                 EPImmediatelyReverseLight.ATTR_ACTUATOR_ID, actuatorId)

@@ -1,4 +1,6 @@
 from threading import Thread
+from threading import get_ident
+
 from exceptions.invalid_api_usage import InvalidAPIUsage
 import logging
 from wgadget.endpoints.ep import EP
@@ -62,6 +64,11 @@ class EPGraduallySetLight(EP):
 
             if value >= 0 and value <= 100:
 
+                # Stop the running Thread
+                self.web_gadget.gradualThreadController.indicateToStop()
+                while self.web_gadget.gradualThreadController.isRunning():
+                    logging.debug( "  Waitiong for thread stops")
+
                 actualValue = self.web_gadget.fetchSavedLightValue()
                 newValue = value
 
@@ -73,7 +80,8 @@ class EPGraduallySetLight(EP):
                 )
 
                 # Save the light value and set the Light
-                thread = Thread(target = self.web_gadget.setLight, args = (newValue, actualValue['current'], inSeconds)) 
+#                thread = Thread(target = self.web_gadget.setLight, args = (newValue, actualValue['current'], inSeconds)) 
+                thread = Thread(target = self.runThread, args = (newValue, actualValue['current'], inSeconds)) 
                 thread.daemon = True
                 thread.start()
 
@@ -85,4 +93,12 @@ class EPGraduallySetLight(EP):
 
         return {'status': 'OK'}
 
+    # THREAD
+    def runThread(self, newValue, actualValue, inSeconds):
+
+        self.web_gadget.gradualThreadController.run(get_ident())
+
+        self.web_gadget.setLight(newValue, actualValue, inSeconds);
+
+        self.web_gadget.gradualThreadController.stopRunning()
 

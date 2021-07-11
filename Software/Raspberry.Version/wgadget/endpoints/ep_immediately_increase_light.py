@@ -51,11 +51,18 @@ class EPImmediatelyIncreaseLight(EP):
         actuatorId = int(payload[EPImmediatelyIncreaseLight.ATTR_ACTUATOR_ID])
         stepValue = int(payload[EPImmediatelyIncreaseLight.ATTR_STEP_VALUE])
 
-        actualValue = self.web_gadget.fetchSavedLightValue()
-        newValue = actualValue['current'] + stepValue
-        newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
-
         if actuatorId == self.web_gadget.getLightId():
+
+            # Stop the running Thread
+            self.web_gadget.gradualThreadController.indicateToStop()
+            while self.web_gadget.gradualThreadController.isRunning():
+
+                logging.debug( "  Waitiong for thread stops")
+
+            actualValueJson = self.web_gadget.fetchSavedLightValue()
+            actualValue = actualValueJson['current']
+            newValue = actualValue + stepValue
+            newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
 
             logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
                 EPImmediatelyIncreaseLight.METHOD, EPImmediatelyIncreaseLight.URL,
@@ -64,7 +71,7 @@ class EPImmediatelyIncreaseLight(EP):
             )
 
             # Save the light value and set the Light
-            return self.web_gadget.setLight(newValue)
+            return self.web_gadget.setLight(newValue, actualValue)
 
         else:
             raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(actuatorId, newValue), status_code=404)

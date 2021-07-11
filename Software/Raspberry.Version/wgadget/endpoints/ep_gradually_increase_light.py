@@ -62,6 +62,11 @@ class EPGraduallyIncreaseLight(EP):
 
         if actuatorId == self.web_gadget.getLightId():
 
+            # Stop the running Thread
+            self.web_gadget.gradualThreadController.indicateToStop()
+            while self.web_gadget.gradualThreadController.isRunning():
+                logging.debug( "  Waitiong for thread stops")
+
             actualValue = self.web_gadget.fetchSavedLightValue()
             newValue = actualValue['current'] + stepValue
             newValue = min(100, newValue) if stepValue > 0 else max(0, newValue)
@@ -74,7 +79,11 @@ class EPGraduallyIncreaseLight(EP):
                         actualValue['current'], newValue)
             )
 
-            thread = Thread(target = self.web_gadget.setLight, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
+            #thread = Thread(target = self.web_gadget.setLight, args = (actuatorId, actualValue['current'], newValue, inSeconds)) 
+            #thread = Thread(target = self.web_gadget.setLight, args = (newValue, actualValue['current'], inSeconds)) 
+
+            thread = Thread(target = self.runThread, args = (newValue, actualValue['current'], inSeconds)) 
+
             thread.daemon = True
             thread.start()
 
@@ -83,3 +92,11 @@ class EPGraduallyIncreaseLight(EP):
 
         return {'status': 'OK'}
 
+    # THREAD
+    def runThread(self, newValue, actualValue, inSeconds):
+
+        self.web_gadget.gradualThreadController.run(get_ident())
+
+        self.web_gadget.setLight(newValue, actualValue, inSeconds);
+
+        self.web_gadget.gradualThreadController.stopRunning()

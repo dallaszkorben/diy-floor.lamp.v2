@@ -56,6 +56,11 @@ class EPImmediatelySetLight(EP):
 
             if value >= 0 and value <= 100:
 
+                # Stop the running Thread
+                self.web_gadget.gradualThreadController.indicateToStop()
+                while self.web_gadget.gradualThreadController.isRunning():
+                    logging.debug( "  Waitiong for thread stops")
+
                 actualValue = self.web_gadget.fetchSavedLightValue()
 
                 logging.debug( "WEB request: {0} {1} ('{2}': {3}, '{4}': {5})".format(
@@ -64,16 +69,16 @@ class EPImmediatelySetLight(EP):
                     EPImmediatelySetLight.ATTR_VALUE, value)
                 )
 
-                if value == 0 and actualValue['current']:
+#                if value == 0 and actualValue['current']:
 
                     # Save the light value and set the Light
-                    return self.web_gadget.setLight(value, actualValue['current'])
+#                    return self.web_gadget.setLight(value, actualValue['current'])
 
-                else:
+#                else:
 
                     # Save the light value and set the Light
-                    return self.web_gadget.setLight(value)
-
+#                    return self.web_gadget.setLight(value)
+                return self.web_gadget.setLight(value, actualValue['current'])
 
             else:
                 raise InvalidAPIUsage("The value is not valid: {0}".format(value), error_code=404)

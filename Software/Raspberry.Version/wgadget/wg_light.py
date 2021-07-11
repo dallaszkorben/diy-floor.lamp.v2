@@ -19,6 +19,7 @@ from flask_cors import CORS
 from wgadget.immediately import ImmediatelyView
 from wgadget.gradually import GraduallyView
 from wgadget.info import InfoView
+from wgadget.gradual_thread_controller import GradualThreadController
 
 from threading import Thread
 
@@ -33,10 +34,14 @@ from senact.sa_ky040 import SAKy040
 
 from config.config_location import ConfigLocation
 
+
+
 class WGLight(object):
 
 #    def __init__(self, gadgetName, actuatorLightId, pinPwm, freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch):
     def __init__(self):
+
+        self.gradualThreadController = GradualThreadController.getInstance()
 
         self.lock = Lock()
 
@@ -69,7 +74,7 @@ class WGLight(object):
         saPwm = SAPwm(self.actuator1Id, self.actuator1PwmPin, self.actuator1PwmFreq)
         saKy040 = SAKy040(self.sensor1Id, self.sensor1ClockPin, self.sensor1DataPin, self.sensor1SwitchPin)
 
-        self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValueMethod=self.fetchSavedLightValue, saveLightValueMethod=self.saveLightValue, switchCallbackMethod=None, rotaryCallbackMethod=None )
+        self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValueMethod=self.fetchSavedLightValue, saveLightValueMethod=self.saveLightValue, shouldItStopMethod=self.gradualThreadController.shouldItStop, switchCallbackMethod=None, rotaryCallbackMethod=None )
 
         self.app = Flask(__name__)
         self.app.logger.setLevel(logging.ERROR)
@@ -104,7 +109,7 @@ class WGLight(object):
         return self.egLight.reverseLight()
 
 #    def setLightGradually(self, toValue, fromValue, inSeconds):
-    def setLight(self, toValue, fromValue=100, inSeconds=0):
+    def setLight(self, toValue, fromValue, inSeconds=0):
 
         return self.egLight.setLight(toValue, fromValue, inSeconds)
 
@@ -137,16 +142,16 @@ class WGLight(object):
 
     # =====================================================
 
-    def saveLightValue(self, value, beforeOffValue=100):
+    def saveLightValue(self, value, beforeOffValue):
 
         with self.lock:
             config_ini = getConfigExchange()
             config_ini["light-current-value"] = value
-            if value:
-                config_ini["light-before-off-value"] = value
-            else:
-                config_ini["light-before-off-value"] = beforeOffValue
-
+#            if value:
+#                config_ini["light-before-off-value"] = value
+#            else:
+#                config_ini["light-before-off-value"] = beforeOffValue
+            config_ini["light-before-off-value"] = beforeOffValue
             setConfigExchange(config_ini)
 
     # ====================================================

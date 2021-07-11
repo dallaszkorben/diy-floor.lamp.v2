@@ -50,7 +50,13 @@ class SAPwm(SA):
     def getSenactId(self):
         return self.id
 
-    def setPwmByValue(self, value):
+    def setPwm(self, toValue, fromValue, inSeconds=0, saveLightValueMethod=None, shouldItStopMethod=None):
+        if inSeconds == 0:
+            self.setPwmByValue(toValue, fromValue, saveLightValueMethod, shouldItStopMethod)
+        else:
+            self.setPwmByStepValueGradually(toValue, fromValue, inSeconds, saveLightValueMethod, shouldItStopMethod)
+
+    def setPwmByValue(self, value, fromValue, saveLightValueMethod, shouldItStopMethod=None):
 
         # sychronizing the method
         with self.lock:
@@ -69,10 +75,12 @@ class SAPwm(SA):
                 __file__)
             )
 
+            if saveLightValueMethod:
+                saveLightValueMethod(value, fromValue)
 
         return fadeValue
 
-    def setPwmByStepValueGradually(self, toValue, fromValue, inSeconds, saveLightValueMethod=None):
+    def setPwmByStepValueGradually(self, toValue, fromValue, inSeconds, saveLightValueMethod=None, shouldItStopMethod=None):
 
         with self.lock:
 
@@ -112,7 +120,13 @@ class SAPwm(SA):
 
                 sleep(secInOneStep)
 
+                if shouldItStopMethod and shouldItStopMethod():
+                    logging.debug( "    Gradually Set was broken by an other process")
+                    break
+
                 fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
+
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
 
                 logging.debug( "    Set to {0} (input: {1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
                     fadeValue,
@@ -122,9 +136,8 @@ class SAPwm(SA):
                     __file__)
                 )
 
-                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
-
                 if saveLightValueMethod:
+
                     saveLightValueMethod(value, fromValue)
 
             logging.debug("Set PWM Duty Cycle gradually is done")

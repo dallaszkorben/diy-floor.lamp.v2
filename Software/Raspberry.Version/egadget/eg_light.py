@@ -11,7 +11,7 @@ from egadget.eg import EG
 
 class EGLight(EG):
 
-    def __init__(self, gadgetName, actuatorPwm, sensorKy040, fetchSavedLightValueMethod=None, saveLightValueMethod=None, rotaryCallbackMethod=None, switchCallbackMethod=None):
+    def __init__(self, gadgetName, actuatorPwm, sensorKy040, fetchSavedLightValueMethod=None, saveLightValueMethod=None, shouldItStopMethod=None, rotaryCallbackMethod=None, switchCallbackMethod=None):
 
         self.minLightValue = 0
         self.maxLightValue = 100
@@ -33,6 +33,7 @@ class EGLight(EG):
 
         self.fetchSavedLightValueMethod = fetchSavedLightValueMethod
         self.saveLightValueMethod = saveLightValueMethod
+        self.shouldItStopMethod = shouldItStopMethod
 
         self.actuatorPwm.configure()
         self.sensorKy040.configure()
@@ -94,14 +95,19 @@ class EGLight(EG):
             __file__)
         )
 
-        if inSeconds:
-            pwmValue = self.actuatorPwm.setPwmByStepValueGradually(toValue, fromValue, inSeconds, self.saveLightValueMethod)
-        else:
-            pwmValue = self.actuatorPwm.setPwmByValue(toValue)
+        pwmValue = self.actuatorPwm.setPwm(toValue, fromValue, inSeconds, self.saveLightValueMethod, self.shouldItStopMethod)
 
-        if self.saveLightValueMethod:
-            self.saveLightValueMethod(toValue, fromValue)
-        else:
+#        if inSeconds:
+#            pwmValue = self.actuatorPwm.setPwmByStepValueGradually(toValue, fromValue, inSeconds, self.saveLightValueMethod)
+#        else:
+#            pwmValue = self.actuatorPwm.setPwmByValue(toValue)
+
+
+
+#        if self.saveLightValueMethod:
+#            self.saveLightValueMethod(toValue, fromValue)
+#        else:
+        if not self.saveLightValueMethod:
             self.lightValue['previous'] = fromValue
             self.lightValue['current'] = toValue
 
