@@ -12,7 +12,7 @@ All verson uses the same 3D printouts and other accessories.
 
 ## Raspberry PI Zero W
 
-Before you run start.py the pigpiod should run as we us pigpio library
+Before you run start.py the pigpiod should run as we use pigpio library
 
 Python dependencies:
  - pip3 install git+https://github.com/teracyhq/flask-classful.git@develop#egg-flask-classful
@@ -22,6 +22,7 @@ Python dependencies:
  - pip3 install tzlocal
 
 Other dependencies:
+ - sudo apt-get install libapache2-mod-wsgi-py3
  - sudo apt install apache2 -y
  - npm install jquery
 
