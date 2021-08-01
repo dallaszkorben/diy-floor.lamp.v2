@@ -36,10 +36,9 @@ from config.config_location import ConfigLocation
 
 
 
-class WGLight(object):
+class WGLight(Flask):
 
-#    def __init__(self, gadgetName, actuatorLightId, pinPwm, freqPwm, sensorPotmeterId, pinClock, pinData, pinSwitch):
-    def __init__(self):
+    def __init__(self, import_name):
 
         self.gradualThreadController = GradualThreadController.getInstance()
 
@@ -76,7 +75,13 @@ class WGLight(object):
 
         self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValueMethod=self.fetchSavedLightValue, saveLightValueMethod=self.saveLightValue, shouldItStopMethod=self.gradualThreadController.shouldItStop, switchCallbackMethod=None, rotaryCallbackMethod=None )
 
-        self.app = Flask(__name__)
+
+        # TODO remove self.app and correnct the references
+
+        super(WGLight, self).__init__(import_name)
+
+        self.app = self
+        #self.app = Flask(__name__)
         self.app.logger.setLevel(logging.ERROR)
 
         # This will enable CORS for all routes
@@ -98,12 +103,19 @@ class WGLight(object):
     def unconfigure(self):
         self.egLight.unconfigure()
 
-    def run(self, host='0.0.0.0', debug=False):
-        self.app.run(host=host, debug=debug)
-#        self.app.run()
+#    def run(self, host='0.0.0.0', debug=False):
+#        self.app.run(host=host, debug=debug)
 
-#    def setLight(self, value, beforeOffValue=100) -> dict:
-#        return self.egLight.setLight(value, beforeOffValue)
+
+    def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
+        super(MainApp, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
+
+
+
+
+
+
+
 
     def reverseLight(self):
         return self.egLight.reverseLight()
@@ -155,3 +167,5 @@ class WGLight(object):
             setConfigExchange(config_ini)
 
     # ====================================================
+
+app = WGLight(__name__)

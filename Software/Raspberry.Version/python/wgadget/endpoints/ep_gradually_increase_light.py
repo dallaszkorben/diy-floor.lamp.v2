@@ -1,6 +1,7 @@
 
 import logging
 from threading import Thread
+from threading import get_ident
 from exceptions.invalid_api_usage import InvalidAPIUsage
 from wgadget.endpoints.ep import EP
 
