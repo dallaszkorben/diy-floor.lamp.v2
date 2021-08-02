@@ -1,14 +1,16 @@
 #! /usr/bin/python3
 
-from wgadget.wg_light import WGLight
+#from wgadget.wg_light import WGLight
+
+from wgadget.wg_light import app as application
 
 if __name__ == "__main__":
 
-    wgLight = WGLight()
+#    wgLight = WGLight(__name__)
 
     try:
-        wgLight.run(host= '0.0.0.0', debug=False)
+        application.run(host= '0.0.0.0', debug=False)
 #        wgLight.run()
 
     finally:
-        wgLight.unconfigure()
+        application.unconfigure()

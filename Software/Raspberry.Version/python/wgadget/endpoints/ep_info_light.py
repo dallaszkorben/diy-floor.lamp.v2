@@ -51,7 +51,8 @@ class EPInfoLight(EP):
                 EPInfoLight.ATTR_ACTUATOR_ID, actuatorId)
             )
 
-            return {"value": actualValue, "process": self.web_gadget.process}
+            return {"value": actualValue, "thread": self.web_gadget.getThreadControllerStatus()}
+#            return {"value": actualValue, "thread": {"inProgress": False, "id":1}}
 
         else:
             raise InvalidAPIUsage("No such actuator: {0} or value: {1}".format(actuatorId, value), error_code=404)

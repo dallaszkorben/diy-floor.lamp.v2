@@ -18,19 +18,25 @@ class GradualThreadController(object):
     def __init__(self):
         self.shouldStop = False
         self.running = False
+        self.threadId = None
 
     def run(self, threadId):
         logging.debug( "Set Thread Started >")
 
+        self.threadId = threadId
         self.shouldStop = False
         self.running = True
 
     def isRunning(self):
         return self.running
 
+    def getStatus(self):
+        return {"inProgress": self.running, "id": self.threadId}
+
     def stopRunning(self):
         self.running = False
         self.shouldStop = False
+        self.threadId = None
 
         logging.debug( "Set Thread Stopped <")
 

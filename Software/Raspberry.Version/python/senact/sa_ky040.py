@@ -78,6 +78,9 @@ class SAKy040(SA):
                               bouncetime=350)
 
     def unconfigure(self):
+
+        logging.error("unconfigure ky040")
+
         GPIO.remove_event_detect(self.clockPin)
         GPIO.remove_event_detect(self.dataPin)
         GPIO.remove_event_detect(self.switchPin)
@@ -86,6 +89,7 @@ class SAKy040(SA):
 
     # control clockwise turn
     def _clockFallingCallback(self, pin):
+
 
         if GPIO.input(self.dataPin) == 1:
 

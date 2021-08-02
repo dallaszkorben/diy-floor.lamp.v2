@@ -33,10 +33,50 @@ user-scalable=no	-disable user zoom on mobile
 <script src="script/jquery-3.6.0.min.js"></script>
 <script src="script/roundslider.min.js"></script>
 <link href="script/roundslider.min.css" rel="stylesheet" />
-<link href="script/button.css" rel="stylesheet" />
+<!--<link href="script/button.css" rel="stylesheet" />-->
 <link href="script/linearslider.css" rel="stylesheet" />
 
+<link href="script/roundbutton/css/style.css" rel="stylesheet" />
+
+
 <script>
+
+    // ================================================
+    //
+    // Eanble/Disable Controllers on the screen
+    //
+    // ================================================
+    function enableControllers(enable){
+
+        if (enable){
+            $("#roundslider").roundSlider('enable', true );
+
+            // enable the Down10 button again
+            $("#buttonDown10").css("pointer-events", "auto");
+            $("#buttonDown10").css("opacity", "1.0");
+
+            // enable the Up10 button again
+            $("#buttonUp10").css("pointer-events", "auto");
+            $("#buttonUp10").css("opacity", "1.0");
+
+
+        }else{
+            $("#roundslider").roundSlider('disable', true );
+            // equivalent solution
+            //$("#roundslider").data("roundSlider").disable();
+
+            // disable the Down10 button
+            $("#buttonDown10").css("pointer-events", "none");
+            $("#buttonDown10").css("opacity", "0.3");
+
+            // disable the Up10 button
+            $("#buttonUp10").css("pointer-events", "none");
+            $("#buttonUp10").css("opacity", "0.3");
+
+        }
+
+
+    }
 
     // ================================================
     //
@@ -47,7 +87,14 @@ user-scalable=no	-disable user zoom on mobile
         $.ajax({type: "GET", url: "/info/actuatorId/1", async: false,
             success: function(result){
                 jsonResult=JSON.parse(result);
-                currentValue=jsonResult.value.current;
+                currentValue = jsonResult.value.current;
+                isThreadInProgress = jsonResult.thread.inProgress
+
+                if(isThreadInProgress){
+                    enableControllers(false);
+                }else{
+                    enableControllers(true);
+                }
 
 //                $("#value").html(jsonResult.current);
 
@@ -56,6 +103,8 @@ user-scalable=no	-disable user zoom on mobile
 
                 // set the current value to the roundSlider
                 $("#roundslider").roundSlider('setValue', currentValue)
+                // equivalent solution
+                //$("#roundslider").data("roundSlider").setValue(currentValue);
 
                 // enable the change listener on roundSlider after the value refresh
                 $("#roundslider").roundSlider({change: sliderChangeListener})
@@ -69,6 +118,11 @@ user-scalable=no	-disable user zoom on mobile
         });
     }
 
+    // ================================================
+    //
+    // Change listener for roundSlider
+    //
+    // ================================================
     function sliderChangeListener(args){
         sliderValue = parseInt(args.value)
         //delay = parseInt($("#delay").val())
@@ -149,7 +203,7 @@ user-scalable=no	-disable user zoom on mobile
         // Round SLIDER
         //----------------------------------
         $("#roundslider").roundSlider({
-            radius: 300,
+            radius: 310,
             width: 60,
             handleSize: "+0", 
             sliderType: "min-range",
@@ -181,7 +235,11 @@ user-scalable=no	-disable user zoom on mobile
 </head>
 <body>
 
-<table border="0" width="500px">
+<table  widht="100%" style="border:0px solid black;margin-left:auto;margin-right:auto;">
+<tr>
+<td style="padding:10px">
+
+<table border="0"  style="">
 
     <!-- Page header -->
     <thead >
@@ -191,22 +249,24 @@ user-scalable=no	-disable user zoom on mobile
     </thead>
 
     <tr>
-        <td colspan="3" align="center">
+        <td colspan="3" align="center" style="padding-left:10px; padding-right:10px">
 
             <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="0" step="1" class="slider" id="durationslider" list="tickmarks">
+                <input type="range" min="0" max="60" value="0" step="1" class="slider" id="durationslider" list="tickmarks">
                     <div id="tickmarks">
                         <p>0</p>
+                        <p>5</p>
                         <p>10</p>
+                        <p>15</p>
                         <p>20</p>
+                        <p>25</p>
                         <p>30</p>
+                        <p>35</p>
                         <p>40</p>
+                        <p>45</p>
                         <p>50</p>
+                        <p>55</p>
                         <p>60</p>
-                        <p>70</p>
-                        <p>80</p>
-                        <p>90</p>
-                        <p>100</p>
                     </div>
                 </input>
             </div>
@@ -224,33 +284,33 @@ user-scalable=no	-disable user zoom on mobile
     <tr height="30">
     </tr>
 
-    <tr>
+    <tr class="nav">
         <td>
-            <div class="buttonHolder">
-                <a href="#" id="buttonUp10" class="button up"></a>
+            <div id="divDown10" >
+                <a href="#" id="buttonDown10" class="icon-down" ></a>
             </div>
         </td>
 
-        <td rowspan="2" width="100%">
+        <td rowspan="1">
+            <div id="divReverse" >
+                <a href="#" id="buttonReverse" class="icon-reverse"></a>
 
-        </td>
-
-        <td rowspan="2">
-            <div class="buttonHolder">
-                <a href="#" id="buttonReverse" class="button reverse"></a>
             </div>
         </td>
-    </tr>
 
-    <tr>
-        <td >
-            <div class="buttonHolder">
-                <a href="#" id="buttonDown10" class="button down"></a>
+        <td>
+            <div id="divUp10" >
+                <a href="#" id="buttonUp10" class="icon-up" ></a>
             </div>
         </td>
     </tr>
 
 </table>
+
+</td>
+</tr>
+</table>
+
 </div>
 
 <div id="errormessage"></div>

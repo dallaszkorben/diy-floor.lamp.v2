@@ -75,14 +75,13 @@ class WGLight(Flask):
 
         self.egLight = EGLight( self.gadgetName, saPwm, saKy040, fetchSavedLightValueMethod=self.fetchSavedLightValue, saveLightValueMethod=self.saveLightValue, shouldItStopMethod=self.gradualThreadController.shouldItStop, switchCallbackMethod=None, rotaryCallbackMethod=None )
 
-
         # TODO remove self.app and correnct the references
 
         super(WGLight, self).__init__(import_name)
 
         self.app = self
         #self.app = Flask(__name__)
-        self.app.logger.setLevel(logging.ERROR)
+        #self.app.logger.setLevel(logging.ERROR)
 
         # This will enable CORS for all routes
         CORS(self.app)
@@ -92,7 +91,10 @@ class WGLight(Flask):
         GraduallyView.register(self.app, init_argument=self)
         InfoView.register(self.app, init_argument=self)
 
-        self.process = {"inProgress": False, "processId": None}
+        #self.process = {"inProgress": False, "processId": None}
+
+    def getThreadControllerStatus(self):
+        return self.gradualThreadController.getStatus()
 
     def getLightId(self):
         return self.actuator1Id
@@ -106,16 +108,14 @@ class WGLight(Flask):
 #    def run(self, host='0.0.0.0', debug=False):
 #        self.app.run(host=host, debug=debug)
 
-
+    # Because of WSGI
     def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
-        super(MainApp, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
+        super(WGLight, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
 
 
-
-
-
-
-
+    def __del__(self):
+        logger.debug("__del__() method is called")
+        self.unconfigure()
 
     def reverseLight(self):
         return self.egLight.reverseLight()
@@ -168,4 +168,6 @@ class WGLight(Flask):
 
     # ====================================================
 
+
+# because of WSGI
 app = WGLight(__name__)
