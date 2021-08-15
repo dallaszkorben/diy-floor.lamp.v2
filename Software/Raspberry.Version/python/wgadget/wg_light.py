@@ -114,7 +114,7 @@ class WGLight(Flask):
 
 
     def __del__(self):
-        logger.debug("__del__() method is called")
+        self.app.logger.debug("__del__() method is called")
         self.unconfigure()
 
     def reverseLight(self):
@@ -147,8 +147,8 @@ class WGLight(Flask):
         config_ini = getConfigExchange()
 
         return {
-            'current': int(config_ini["light-current-value"]),
-            'previous': int(config_ini["light-before-off-value"])
+            'current': float(config_ini["light-current-value"]),
+            'previous': float(config_ini["light-before-off-value"])
 
         }
 

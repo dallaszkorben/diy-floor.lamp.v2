@@ -5,6 +5,8 @@ import RPi.GPIO as GPIO
 import pigpio
 from time import sleep
 
+import numpy as np
+
 from threading import Lock
 
 #if __name__ == "__main__":
@@ -56,6 +58,9 @@ class SAPwm(SA):
         else:
             self.setPwmByStepValueGradually(toValue, fromValue, inSeconds, saveLightValueMethod, shouldItStopMethod)
 
+    def setHardwareValue(pin, freq, duty):
+        self.pi_pwm.hardware_PWM(pin, freq, self.maxDutyCycle - duty)
+
     def setPwmByValue(self, value, fromValue, saveLightValueMethod, shouldItStopMethod=None):
 
         # sychronizing the method
@@ -64,8 +69,10 @@ class SAPwm(SA):
             # calculate the pwm by value
             fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
 
+
             # Change the Duty Cycle
-            self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
+            #self.setHardwareValue(self.pwmPin, self.pwmFreq, fadeValue)
+            self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, self.maxDutyCycle - fadeValue)
 
             logging.debug( "Set PWM Duty Cycle to {0} (input: {1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
                 fadeValue,
@@ -95,17 +102,9 @@ class SAPwm(SA):
                 return
 
 
-            secInOneStep = abs(inSeconds / diff)
-
-            if diff >= 0:
-                par1 = fromValue
-                par2 = toValue + 1
-                par3 = 1
-
-            elif diff < 0:
-                par1 = fromValue
-                par2 = toValue - 1
-                par3 = -1
+            TIME_STEP = 0.2
+            steps = inSeconds / TIME_STEP
+            valueStep = diff / steps
 
             logging.debug("Set PWM Duty Cycle gradually from {0} (input: {1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
                 Converter.getLinearValueToExponential(fromValue, self.maxValue, self.maxDutyCycle),
@@ -116,9 +115,11 @@ class SAPwm(SA):
                 __file__)
             )
 
-            for value in range(par1, par2, par3):
+            valueRange = np.linspace(fromValue, toValue, steps)
 
-                sleep(secInOneStep)
+            for value in valueRange:
+
+                sleep(TIME_STEP)
 
                 if shouldItStopMethod and shouldItStopMethod():
                     logging.debug( "    Gradually Set was broken by an other process")
@@ -126,7 +127,7 @@ class SAPwm(SA):
 
                 fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
 
-                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, fadeValue)
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, self.maxDutyCycle - fadeValue)
 
                 logging.debug( "    Set to {0} (input: {1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
                     fadeValue,

@@ -15,5 +15,8 @@ class Converter:
         # 0 ... MAX_DUTY_CYCLE
         fadeValue = (int)(maxDutyCycle * expValue / (POWER - 1))
 
+        fadeValue = min(fadeValue, maxDutyCycle)
+        fadeValue = max(fadeValue, 0)
+
         return fadeValue
 
