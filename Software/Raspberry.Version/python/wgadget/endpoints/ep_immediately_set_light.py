@@ -2,6 +2,7 @@
 import logging
 from exceptions.invalid_api_usage import InvalidAPIUsage
 from wgadget.endpoints.ep import EP
+from time import sleep
 
 class EPImmediatelySetLight(EP):
 
@@ -15,6 +16,8 @@ class EPImmediatelySetLight(EP):
 
     ATTR_ACTUATOR_ID = 'actuatorId'
     ATTR_VALUE = 'value'
+
+    TIME_WAIT_FOR_THREAD = 0.5
 
     def __init__(self, web_gadget):
         self.web_gadget = web_gadget
@@ -59,7 +62,8 @@ class EPImmediatelySetLight(EP):
                 # Stop the running Thread
                 self.web_gadget.gradualThreadController.indicateToStop()
                 while self.web_gadget.gradualThreadController.isRunning():
-                    logging.debug( "  Waitiong for thread stops")
+                    logging.debug( "  Waitiong for thread stops in {0} in executedByPayload() method".format(__file__))
+                    sleep(self.__class__.TIME_WAIT_FOR_THREAD)
 
                 actualValue = self.web_gadget.fetchSavedLightValue()
 

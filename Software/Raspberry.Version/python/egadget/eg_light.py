@@ -97,16 +97,6 @@ class EGLight(EG):
 
         pwmValue = self.actuatorPwm.setPwm(toValue, fromValue, inSeconds, self.saveLightValueMethod, self.shouldItStopMethod)
 
-#        if inSeconds:
-#            pwmValue = self.actuatorPwm.setPwmByStepValueGradually(toValue, fromValue, inSeconds, self.saveLightValueMethod)
-#        else:
-#            pwmValue = self.actuatorPwm.setPwmByValue(toValue)
-
-
-
-#        if self.saveLightValueMethod:
-#            self.saveLightValueMethod(toValue, fromValue)
-#        else:
         if not self.saveLightValueMethod:
             self.lightValue['previous'] = fromValue
             self.lightValue['current'] = toValue
@@ -152,6 +142,26 @@ class EGLight(EG):
         result = self.setLight(toValue, fromValue, inSeconds)
 
         return result
+
+    def sendSignal(self, signalId=0) -> dict:
+
+        if self.fetchSavedLightValueMethod:
+            lightValue = self.fetchSavedLightValueMethod()
+        else:
+            lightValue = self.lightValue
+
+        originalValue = lightValue['current']
+
+        logging.info( "Send signal {0} --- FILE: {1}".format(
+            signalId,
+            __file__)
+        )
+
+        pwmValue = self.actuatorPwm.sendSignal(signalId, originalValue, self.saveLightValueMethod, self.shouldItStopMethod)
+
+        return {'result': 'OK', 'value': originalValue}
+
+
 
     # ==============================================
 

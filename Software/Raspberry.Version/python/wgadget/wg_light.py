@@ -19,6 +19,9 @@ from flask_cors import CORS
 from wgadget.immediately import ImmediatelyView
 from wgadget.gradually import GraduallyView
 from wgadget.info import InfoView
+
+from wgadget.signal import SignalView
+
 from wgadget.gradual_thread_controller import GradualThreadController
 
 from threading import Thread
@@ -90,6 +93,7 @@ class WGLight(Flask):
         ImmediatelyView.register(self.app, init_argument=self)
         GraduallyView.register(self.app, init_argument=self)
         InfoView.register(self.app, init_argument=self)
+        SignalView.register(self.app, init_argument=self)
 
         #self.process = {"inProgress": False, "processId": None}
 
@@ -119,6 +123,11 @@ class WGLight(Flask):
 
     def reverseLight(self):
         return self.egLight.reverseLight()
+
+
+    def sendSignal(self, signalId):
+
+        return self.egLight.sendSignal(signalId)
 
 #    def setLightGradually(self, toValue, fromValue, inSeconds):
     def setLight(self, toValue, fromValue, inSeconds=0):

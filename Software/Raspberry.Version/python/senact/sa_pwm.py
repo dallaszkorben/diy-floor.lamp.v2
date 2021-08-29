@@ -25,6 +25,12 @@ import logging
 
 class SAPwm(SA):
 
+    INVERSE_OUTPUT = True
+
+    TIME_STEP = 0.2
+    TIME_SIGNAL = 0.3
+
+
     MIN_VALUE = 0
     MAX_VALUE = 100
     MIN_DUTY_CYCLE = 0
@@ -69,10 +75,10 @@ class SAPwm(SA):
             # calculate the pwm by value
             fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
 
-
             # Change the Duty Cycle
             #self.setHardwareValue(self.pwmPin, self.pwmFreq, fadeValue)
-            self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, self.maxDutyCycle - fadeValue)
+
+            self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq,  self.maxDutyCycle - fadeValue if self.__class__.INVERSE_OUTPUT else fadeValue)
 
             logging.debug( "Set PWM Duty Cycle to {0} (input: {1}) in {2} Hz frequency on PIN #{3} --- FILE: {4}".format(
                 fadeValue,
@@ -101,9 +107,7 @@ class SAPwm(SA):
                 )
                 return
 
-
-            TIME_STEP = 0.2
-            steps = inSeconds / TIME_STEP
+            steps = inSeconds / self.__class__.TIME_STEP
             valueStep = diff / steps
 
             logging.debug("Set PWM Duty Cycle gradually from {0} (input: {1}) to {2} (<-{3}) in {4} seconds --- FILE: {5}".format(
@@ -119,7 +123,7 @@ class SAPwm(SA):
 
             for value in valueRange:
 
-                sleep(TIME_STEP)
+                sleep(self.__class__.TIME_STEP)
 
                 if shouldItStopMethod and shouldItStopMethod():
                     logging.debug( "    Gradually Set was broken by an other process")
@@ -127,7 +131,7 @@ class SAPwm(SA):
 
                 fadeValue = Converter.getLinearValueToExponential(value, self.maxValue, self.maxDutyCycle)
 
-                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, self.maxDutyCycle - fadeValue)
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq, self.maxDutyCycle - fadeValue if self.__class__.INVERSE_OUTPUT else fadeValue)
 
                 logging.debug( "    Set to {0} (input: {1}) in {2} frequency on PIN #{3} --- FILE: {4}".format(
                     fadeValue,
@@ -142,6 +146,33 @@ class SAPwm(SA):
                     saveLightValueMethod(value, fromValue)
 
             logging.debug("Set PWM Duty Cycle gradually is done")
+
+        return
+
+    def sendSignal(self, signalId, originalValue, saveLightValueMethod, shouldItStopMethod=None):
+
+        # sychronizing the method
+        with self.lock:
+
+            convertedOriginalValue = Converter.getLinearValueToExponential(originalValue, self.maxValue, self.maxDutyCycle)
+
+#            newValue = 10 if originalValue == 0 else (SAPwm.MAX_VALUE - originalValue)
+            newValue = 10 if originalValue == 0 else 0
+
+            convertedNewValue = Converter.getLinearValueToExponential(newValue, self.maxValue, self.maxDutyCycle)
+
+            for x in range(signalId * 3):
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq,  self.maxDutyCycle - convertedNewValue if self.__class__.INVERSE_OUTPUT else convertedNewValue)
+                sleep(self.__class__.TIME_SIGNAL/4)
+                self.pi_pwm.hardware_PWM(self.pwmPin, self.pwmFreq,  self.maxDutyCycle - convertedOriginalValue if self.__class__.INVERSE_OUTPUT else convertedOriginalValue)
+                sleep(self.__class__.TIME_SIGNAL)
+
+            logging.debug( "Signal '{0}' 1{2} Hz frequency on PIN #{2} was sent --- FILE: {3}".format(
+                signalId,
+                self.pwmFreq,
+                self.pwmPin,
+                __file__)
+            )
 
         return
 
