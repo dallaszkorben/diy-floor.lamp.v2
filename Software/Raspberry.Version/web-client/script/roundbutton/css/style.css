@@ -22,7 +22,8 @@
 .icon-home:after { content: "\2302"; } 
 .icon-cog:after { content: "\2699"; } 
 .icon-cw:after { content: "\27f3"; } 
-.icon-location:after { content: "\e724"; } 
+.icon-location:after { content: "\e724"; }
+.icon-heart:after { content: "\2764"; }
 
 * { 
   -webkit-box-sizing: border-box; 
